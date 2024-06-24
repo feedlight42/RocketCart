@@ -2,6 +2,8 @@ package com.example.RocketCart.model;
 
 import jakarta.persistence.*;
 
+import java.util.List;
+
 @Entity
 public class Customer {
 
@@ -14,6 +16,11 @@ public class Customer {
     private String address;
     private String phoneNumber;
     private String billingAddress;
+
+    // In Customer entity
+    @OneToMany(mappedBy = "customerId")
+    private List<Cart> cartItems;
+
 
     public Integer getCustomerId() {
         return customerId;
@@ -69,6 +76,14 @@ public class Customer {
 
     public void setBillingAddress(String billingAddress) {
         this.billingAddress = billingAddress;
+    }
+
+    public List<Cart> getCartItems() {
+        return cartItems;
+    }
+
+    public void setCartItems(List<Cart> cartItems) {
+        this.cartItems = cartItems;
     }
 
     // Getters and setters
