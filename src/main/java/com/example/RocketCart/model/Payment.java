@@ -12,9 +12,8 @@ public class Payment {
     private String paymentMethod;
     private Double amount;
 
-    @ManyToOne
-    @JoinColumn(name = "order_id")
-    private OrderTable order;
+
+    private Integer orderTableId;
 
     public Integer getPaymentId() {
         return paymentId;
@@ -48,12 +47,12 @@ public class Payment {
         this.amount = amount;
     }
 
-    public OrderTable getOrder() {
-        return order;
+    public Integer getOrderTableId() {
+        return orderTableId;
     }
 
-    public void setOrder(OrderTable order) {
-        this.order = order;
+    public void setOrderTableId(Integer orderTableId) {
+        this.orderTableId = orderTableId;
     }
 
     // Getters and setters

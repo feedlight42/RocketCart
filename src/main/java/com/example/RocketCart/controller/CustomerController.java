@@ -1,14 +1,16 @@
 package com.example.RocketCart.controller;
 
-import com.example.RocketCart.model.Cart;
-import com.example.RocketCart.model.Customer;
-import com.example.RocketCart.repository.CartRepository;
-import com.example.RocketCart.repository.CustomerRepository;
+import com.example.RocketCart.model.*;
+import com.example.RocketCart.repository.*;
+import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.math.BigDecimal;
+import java.text.DecimalFormat;
+import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 
@@ -17,11 +19,20 @@ public class CustomerController {
 
     private final CustomerRepository customerRepository;
     private final CartRepository cartRepository;
+    private final OrderTableRepository orderTableRepository;
+    private final OrderDetailRepository orderDetailRepository;
+    private final PaymentRepository paymentRepository;
+    private final ProductRepository productRepository;
 
     @Autowired
-    public CustomerController(CustomerRepository customerRepository, CartRepository cartRepository) {
+    public CustomerController(CustomerRepository customerRepository, CartRepository cartRepository, OrderTableRepository orderRepository, OrderDetailRepository orderDetailRepository, PaymentRepository paymentRepository, ProductRepository productRepository) {
         this.customerRepository = customerRepository;
         this.cartRepository = cartRepository;
+        this.orderTableRepository = orderRepository;
+        this.orderDetailRepository = orderDetailRepository;
+        this.paymentRepository = paymentRepository;
+        this.productRepository = productRepository;
+
     }
 
     @PostMapping("/api/customers")
@@ -104,6 +115,62 @@ public class CustomerController {
 
         }
         return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+    }
+
+
+    @GetMapping("/api/customers/{customerId}/orderhistory")
+    public List<OrderTable> getOrderHistory(@PathVariable int customerId) {
+        List<OrderTable> orderHistory = orderTableRepository.findAllByCustomerId(customerId);
+        return orderHistory;
+    }
+
+    @Transactional
+    @PostMapping("/api/customers/{customerId}/payment")
+    public void placeOrderAndMakePayment(@PathVariable int customerId, @RequestBody Payment paymentRequest) {
+        // Logic to create new order
+
+
+        List<Cart> cartItems = cartRepository.findAllByCustomerId(customerId);
+        double totalAmount = 0;
+        for (Cart cartItem : cartItems) {
+            Product product = productRepository.findById(cartItem.getProductId()).orElse(null);
+            if (product != null) {
+                totalAmount += (product.getPrice() * (cartItem.getQuantity()));
+            }
+        }
+        System.out.println(totalAmount);
+
+        // Other order details
+        OrderTable newOrder = new OrderTable();
+        newOrder.setCustomerId(customerId);
+        newOrder.setOrderDate(new Date());
+        newOrder.setTotalAmount((double) totalAmount);
+        newOrder.setStatus("Pending");
+
+        OrderTable savedOrder = orderTableRepository.save(newOrder);
+
+        Payment newPayment = new Payment();
+        newPayment.setOrderTableId(savedOrder.getOrderId());
+        newPayment.setPaymentDate(new Date());
+        newPayment.setPaymentMethod(paymentRequest.getPaymentMethod());
+        newPayment.setAmount((double) totalAmount);
+
+        // Save the payment
+        Payment savedPayment = paymentRepository.save(newPayment);
+
+        // Move cart items to order details and clear the cart
+
+        for (Cart cartItem : cartItems) {
+            OrderDetail orderDetail = new OrderDetail();
+            orderDetail.setOrderId(savedOrder.getOrderId());
+            orderDetail.setProductId(cartItem.getProductId());
+            orderDetail.setQuantity(cartItem.getQuantity());
+
+            orderDetailRepository.save(orderDetail);
+        }
+
+        // Clear the cart after moving items to order details
+        cartRepository.deleteAllByCustomerId(customerId);
     }
 
 }

@@ -14,9 +14,8 @@ public class Product {
     private Integer stock;
     private String categoryName;
 
-    @ManyToOne
-    @JoinColumn(name = "seller_id")
-    private Seller seller;
+
+    private Integer sellerId;
 
     public Integer getProductId() {
         return productId;
@@ -66,12 +65,12 @@ public class Product {
         this.categoryName = categoryName;
     }
 
-    public Seller getSeller() {
-        return seller;
+    public Integer getSellerId() {
+        return sellerId;
     }
 
-    public void setSeller(Seller seller) {
-        this.seller = seller;
+    public void setSellerId(Integer sellerId) {
+        this.sellerId = sellerId;
     }
 
     // Getters and setters

@@ -12,10 +12,7 @@ public class OrderTable {
     private Date orderDate;
     private Double totalAmount;
     private String status;
-
-    @ManyToOne
-    @JoinColumn(name = "customer_id")
-    private Customer customer;
+    private Integer customerId;
 
     public Integer getOrderId() {
         return orderId;
@@ -49,12 +46,12 @@ public class OrderTable {
         this.status = status;
     }
 
-    public Customer getCustomer() {
-        return customer;
+    public Integer getCustomerId() {
+        return customerId;
     }
 
-    public void setCustomer(Customer customer) {
-        this.customer = customer;
+    public void setCustomerId(Integer customerId) {
+        this.customerId = customerId;
     }
 
     // Getters and setters

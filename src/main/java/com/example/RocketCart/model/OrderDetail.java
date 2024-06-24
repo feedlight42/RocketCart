@@ -1,6 +1,7 @@
 package com.example.RocketCart.model;
 
 import jakarta.persistence.*;
+import jakarta.persistence.criteria.CriteriaBuilder;
 
 @Entity
 public class OrderDetail {
@@ -10,13 +11,9 @@ public class OrderDetail {
     private Integer orderDetailId;
     private Integer quantity;
 
-    @ManyToOne
-    @JoinColumn(name = "order_id")
-    private OrderTable order;
+    private Integer orderId;
 
-    @ManyToOne
-    @JoinColumn(name = "product_id")
-    private Product product;
+    private Integer productId;
 
     public Integer getOrderDetailId() {
         return orderDetailId;
@@ -34,21 +31,22 @@ public class OrderDetail {
         this.quantity = quantity;
     }
 
-    public OrderTable getOrder() {
-        return order;
+    public Integer getOrderId() {
+        return orderId;
     }
 
-    public void setOrder(OrderTable order) {
-        this.order = order;
+    public void setOrderId(Integer orderId) {
+        this.orderId = orderId;
     }
 
-    public Product getProduct() {
-        return product;
+    public Integer getProductId() {
+        return productId;
     }
 
-    public void setProduct(Product product) {
-        this.product = product;
+    public void setProductId(Integer productId) {
+        this.productId = productId;
     }
+
 
     // Getters and setters
 }

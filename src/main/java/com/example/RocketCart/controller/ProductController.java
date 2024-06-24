@@ -23,9 +23,10 @@ public class ProductController {
     }
 
     @GetMapping("/api/products")
-    public ResponseEntity<List<Product>> getAllProducts() {
-        List<Product> products = productRepository.findAll();
-        return new ResponseEntity<>(products, HttpStatus.OK);
+    public List<Product> listProducts() {
+
+            return productRepository.findAll();
+
     }
 
     @GetMapping("/api/products/{productId}")
