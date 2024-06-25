@@ -54,7 +54,7 @@ public class AuthController {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid username or password");
         }
 
-        return ResponseEntity.ok("Login successful");
+        return ResponseEntity.ok(user);
 
     }
 
