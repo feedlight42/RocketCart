@@ -18,4 +18,18 @@ public class ProductService {
     public Page<Product> getAllProducts(Pageable pageable) {
         return productRepository.findAll(pageable);
     }
+
+    public Page<Product> findAllByPriceAndCategory(Pageable pageable, Double minPrice, Double maxPrice, String categoryName) {
+        if (minPrice != null && maxPrice != null && categoryName != null) {
+            return productRepository.findByPriceBetweenAndCategoryNameContaining(minPrice, maxPrice, categoryName, pageable);
+        } else if (minPrice != null && maxPrice != null) {
+            return productRepository.findByPriceBetween(minPrice, maxPrice, pageable);
+        } else if (categoryName != null) {
+            return productRepository.findByCategoryNameContaining(categoryName, pageable);
+        } else {
+            return productRepository.findAll(pageable);
+        }
+    }
+
+
 }

@@ -38,16 +38,22 @@ public class ProductController {
 
     @GetMapping("/api/products")
     public Page<Product> getProducts(@RequestParam(defaultValue = "0") int page,
-                                     @RequestParam(defaultValue = "10") int size) {
+                                     @RequestParam(defaultValue = "10000000") int size,
+                                     @RequestParam(required = false) Double minPrice,
+                                     @RequestParam(required = false) Double maxPrice,
+                                     @RequestParam(required = false) String categoryName) {
         Pageable pageable = PageRequest.of(page, size);
-        return productService.getAllProducts(pageable);
+        return productService.findAllByPriceAndCategory(pageable, minPrice, maxPrice, categoryName);
     }
 
 
     @GetMapping("/api/products/{productId}")
     public ResponseEntity<Product> getProductById(@PathVariable Integer productId) {
+
         Optional<Product> productOptional = productRepository.findById(productId);
         return productOptional.map(product -> new ResponseEntity<>(product, HttpStatus.OK))
                 .orElseGet(() -> new ResponseEntity<>(HttpStatus.NOT_FOUND));
+
     }
+
 }
