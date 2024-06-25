@@ -1,11 +1,13 @@
 package com.example.RocketCart.controller;
 
+import com.example.RocketCart.controller.exceptions.InsufficientStockException;
 import com.example.RocketCart.model.*;
 import com.example.RocketCart.repository.*;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.transaction.annotation.Isolation;
 import org.springframework.web.bind.annotation.*;
 
 import java.math.BigDecimal;
@@ -126,25 +128,36 @@ public class CustomerController {
 
     @Transactional
     @PostMapping("/api/customers/{customerId}/payment")
-    public void placeOrderAndMakePayment(@PathVariable int customerId, @RequestBody Payment paymentRequest) {
+    public void placeOrderAndMakePayment(@PathVariable int customerId, @RequestBody Payment paymentRequest) throws InsufficientStockException {
         // Logic to create new order
-
-
         List<Cart> cartItems = cartRepository.findAllByCustomerId(customerId);
         double totalAmount = 0;
+
         for (Cart cartItem : cartItems) {
             Product product = productRepository.findById(cartItem.getProductId()).orElse(null);
+
             if (product != null) {
-                totalAmount += (product.getPrice() * (cartItem.getQuantity()));
+                totalAmount += (product.getPrice() * cartItem.getQuantity());
+                int orderedQuantity = cartItem.getQuantity();
+
+                // Update product stock
+                if (product.getStock() >= orderedQuantity) {
+                    product.setStock(product.getStock() - orderedQuantity);
+                } else {
+                    // Handle insufficient stock scenario
+                    // You can throw an exception or handle it based on your requirements
+                    // For example:
+                    throw new InsufficientStockException("Insufficient stock for product: " + product.getProductName());
+                }
+                productRepository.save(product);
             }
         }
-        System.out.println(totalAmount);
 
-        // Other order details
+        // Create new order
         OrderTable newOrder = new OrderTable();
         newOrder.setCustomerId(customerId);
         newOrder.setOrderDate(new Date());
-        newOrder.setTotalAmount((double) totalAmount);
+        newOrder.setTotalAmount(totalAmount);
         newOrder.setStatus("Pending");
 
         OrderTable savedOrder = orderTableRepository.save(newOrder);
@@ -153,13 +166,12 @@ public class CustomerController {
         newPayment.setOrderTableId(savedOrder.getOrderId());
         newPayment.setPaymentDate(new Date());
         newPayment.setPaymentMethod(paymentRequest.getPaymentMethod());
-        newPayment.setAmount((double) totalAmount);
+        newPayment.setAmount(totalAmount);
 
         // Save the payment
         Payment savedPayment = paymentRepository.save(newPayment);
 
         // Move cart items to order details and clear the cart
-
         for (Cart cartItem : cartItems) {
             OrderDetail orderDetail = new OrderDetail();
             orderDetail.setOrderId(savedOrder.getOrderId());
@@ -172,6 +184,7 @@ public class CustomerController {
         // Clear the cart after moving items to order details
         cartRepository.deleteAllByCustomerId(customerId);
     }
+
 
 }
 
