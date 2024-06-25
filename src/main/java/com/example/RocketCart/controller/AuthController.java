@@ -23,18 +23,17 @@ public class AuthController {
     private CustomerRepository customerRepository;
 
 
-//    @PostMapping("/signup")
-//    public ResponseEntity<?> signUp(@RequestBody User user) {
-//        if (userRepository.existsByUsername(user.getUsername())) {
-//            return ResponseEntity.badRequest().body("Username is already taken!");
-//        }
-//
-//        // Encrypt the password before storing in the database
-//        user.setPassword(passwordEncoder.encode(user.getPassword()));
-//        userRepository.save(user);
-//
-//        return ResponseEntity.ok("User registered successfully");
-//    }
+    @PostMapping("/signup")
+    public ResponseEntity<?> signUp(@RequestBody Customer user) {
+
+
+        // Encrypt the password before storing in the database
+        user.setPassword(user.getPassword());
+        user.setEmail(user.getEmail());
+        customerRepository.save(user);
+
+        return ResponseEntity.ok("User registered successfully");
+    }
 
 
     @PostMapping("/login")

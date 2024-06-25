@@ -8,11 +8,15 @@ public class Product {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer productId;
+
+    @Column(name = "productName", columnDefinition = "TEXT")
     private String productName;
+    @Column(name = "description", columnDefinition = "TEXT")
     private String description;
     private Double price;
     private Integer stock;
     private String categoryName;
+    private  String imageUrl;
 
 
     private Integer sellerId;
@@ -71,6 +75,14 @@ public class Product {
 
     public void setSellerId(Integer sellerId) {
         this.sellerId = sellerId;
+    }
+
+    public String getImageUrl() {
+        return imageUrl;
+    }
+
+    public void setImageUrl(String imageUrl) {
+        this.imageUrl = imageUrl;
     }
 
     // Getters and setters
