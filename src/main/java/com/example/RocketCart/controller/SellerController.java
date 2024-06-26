@@ -49,9 +49,12 @@ public class SellerController {
             @RequestParam(defaultValue = "10") int size) {
 
 //        Pageable pageable = PageRequest.of(page, size, );
-        Pageable pageable = PageRequest.of(page, size, Sort.by("productId").ascending());
+//        Pageable pageable = PageRequest.of(page, size, Sort.by("productId").ascending());
+        Pageable pageable = PageRequest.of(page, size);
+        Integer sort = 0;
+        Sort.Direction sortDirection = (sort == 1) ? Sort.Direction.DESC : Sort.Direction.ASC;
+        pageable = PageRequest.of(page, size, Sort.by(sortDirection, "productId"));
         Page<Product> products = productRepository.findBySellerId(sellerId, pageable);
-
         if (products.hasContent()) {
             return ResponseEntity.ok(products);
         } else {

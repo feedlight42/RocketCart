@@ -13,7 +13,11 @@ public class OrderDetail {
 
     private Integer orderId;
 
-    private Integer productId;
+//    private Integer productId;
+
+    @ManyToOne()
+    @JoinColumn(name = "productId", referencedColumnName = "productId")
+    private Product product;
 
     public Integer getOrderDetailId() {
         return orderDetailId;
@@ -39,13 +43,21 @@ public class OrderDetail {
         this.orderId = orderId;
     }
 
-    public Integer getProductId() {
-        return productId;
+    public Product getProduct() {
+        return product;
     }
 
-    public void setProductId(Integer productId) {
-        this.productId = productId;
+    public void setProduct(Product product) {
+        this.product = product;
     }
+
+//    public Integer getProductId() {
+//        return productId;
+//    }
+//
+//    public void setProductId(Integer productId) {
+//        this.productId = productId;
+//    }
 
 
     // Getters and setters
