@@ -2,6 +2,8 @@ package com.example.RocketCart.model;
 
 import jakarta.persistence.*;
 
+import java.util.List;
+
 @Entity
 public class Cart {
 
@@ -14,7 +16,11 @@ public class Cart {
     private Integer customerId;
 
 
-    private Integer productId;
+
+    @ManyToOne()
+    @JoinColumn(name = "productId", referencedColumnName = "productId")
+    private Product product;
+
 
     public Integer getCartItemId() {
         return cartItemId;
@@ -40,12 +46,14 @@ public class Cart {
         this.customerId = customerId;
     }
 
-    public Integer getProductId() {
-        return productId;
+
+
+    public Product getProduct() {
+        return product;
     }
 
-    public void setProductId(Integer productId) {
-        this.productId = productId;
+    public void setProduct(Product product) {
+        this.product = product;
     }
 
 

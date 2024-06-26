@@ -37,6 +37,7 @@ public class CustomerController {
 
     }
 
+
     @PostMapping("/api/customers")
     public ResponseEntity<Customer> createCustomer(@RequestBody Customer customer) {
         Customer newCustomer = customerRepository.save(customer);
@@ -134,7 +135,7 @@ public class CustomerController {
         double totalAmount = 0;
 
         for (Cart cartItem : cartItems) {
-            Product product = productRepository.findById(cartItem.getProductId()).orElse(null);
+            Product product = productRepository.findById(cartItem.getProduct().getProductId()).orElse(null);
 
             if (product != null) {
                 totalAmount += (product.getPrice() * cartItem.getQuantity());
@@ -175,7 +176,7 @@ public class CustomerController {
         for (Cart cartItem : cartItems) {
             OrderDetail orderDetail = new OrderDetail();
             orderDetail.setOrderId(savedOrder.getOrderId());
-            orderDetail.setProductId(cartItem.getProductId());
+            orderDetail.setProductId(cartItem.getProduct().getProductId());
             orderDetail.setQuantity(cartItem.getQuantity());
 
             orderDetailRepository.save(orderDetail);
