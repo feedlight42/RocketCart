@@ -46,7 +46,8 @@ public class SellerController {
     public ResponseEntity<Page<Product>> getProductsBySeller(
             @PathVariable int sellerId,
             @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "10") int size) {
+            @RequestParam(defaultValue = "10") int size,
+            @RequestParam(defaultValue = "", required = false) String searchKeyword) {
 
 //        Pageable pageable = PageRequest.of(page, size, );
 //        Pageable pageable = PageRequest.of(page, size, Sort.by("productId").ascending());
@@ -54,7 +55,7 @@ public class SellerController {
         Integer sort = 0;
         Sort.Direction sortDirection = (sort == 1) ? Sort.Direction.DESC : Sort.Direction.ASC;
         pageable = PageRequest.of(page, size, Sort.by(sortDirection, "productId"));
-        Page<Product> products = productRepository.findBySellerId(sellerId, pageable);
+        Page<Product> products = productRepository.findBySellerIdAndProductNameContaining(sellerId, searchKeyword, pageable);
         if (products.hasContent()) {
             return ResponseEntity.ok(products);
         } else {
@@ -97,5 +98,7 @@ public class SellerController {
         productRepository.delete(product);
         return ResponseEntity.noContent().build();
     }
+
+
 }
 

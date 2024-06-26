@@ -212,7 +212,7 @@ public class CustomerController {
         for (Cart cartItem : cartItems) {
             OrderDetail orderDetail = new OrderDetail();
             orderDetail.setOrderId(savedOrder.getOrderId());
-            orderDetail.getProduct().setProductId(cartItem.getProduct().getProductId());
+            orderDetail.setProduct(cartItem.getProduct());
             orderDetail.setQuantity(cartItem.getQuantity());
 
             orderDetailRepository.save(orderDetail);
