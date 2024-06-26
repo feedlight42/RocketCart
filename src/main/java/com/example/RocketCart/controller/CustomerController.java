@@ -151,6 +151,17 @@ public class CustomerController {
         return orderHistory;
     }
 
+    @GetMapping("/api/customers/{customerId}/orderhistory/{orderId}")
+    public ResponseEntity<List<OrderDetail>> getOrderDetailsByOrderId(@PathVariable Integer orderId) {
+        List<OrderDetail> orderDetails = orderDetailRepository.getOrderDetailsByOrderId(orderId);
+
+        if (!orderDetails.isEmpty()) {
+            return ResponseEntity.ok(orderDetails);
+        } else {
+            return ResponseEntity.notFound().build();
+        }
+    }
+
 
     @Transactional
     @PostMapping("/api/customers/{customerId}/payment")

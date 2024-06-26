@@ -5,6 +5,10 @@ import com.example.RocketCart.model.Seller;
 import com.example.RocketCart.repository.ProductRepository;
 import com.example.RocketCart.repository.SellerRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -39,8 +43,20 @@ public class SellerController {
     }
 
     @GetMapping("/{sellerId}/products")
-    public List<Product> getProductsBySeller(@PathVariable int sellerId) {
-        return productRepository.findBySellerId(sellerId);
+    public ResponseEntity<Page<Product>> getProductsBySeller(
+            @PathVariable int sellerId,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size) {
+
+//        Pageable pageable = PageRequest.of(page, size, );
+        Pageable pageable = PageRequest.of(page, size, Sort.by("productId").ascending());
+        Page<Product> products = productRepository.findBySellerId(sellerId, pageable);
+
+        if (products.hasContent()) {
+            return ResponseEntity.ok(products);
+        } else {
+            return ResponseEntity.noContent().build();
+        }
     }
 
     @PostMapping("/{sellerId}/products")

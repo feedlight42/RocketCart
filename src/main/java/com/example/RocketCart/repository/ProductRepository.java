@@ -10,8 +10,14 @@ import java.util.List;
 
 public interface ProductRepository extends JpaRepository<Product, Integer> {
 
+    Page<Product> findByPriceBetweenAndCategoryNameContainingIgnoreCaseAndProductNameContainingIgnoreCase(Double minPrice, Double maxPrice, String categoryName, String productName, Pageable pageable);
+    Page<Product> findByPriceBetweenAndProductNameContainingIgnoreCase(Double minPrice, Double maxPrice, String productName, Pageable pageable);
+    Page<Product> findByCategoryNameContainingIgnoreCaseAndProductNameContainingIgnoreCase(String categoryName, String productName, Pageable pageable);
+    Page<Product> findByProductNameContainingIgnoreCase(String productName, Pageable pageable);
 
-    List<Product> findBySellerId(int sellerId);
+//    List<Product> findBySellerId(int sellerId);
+
+    Page<Product> findBySellerId(int sellerId, Pageable pageable);
 
     Product findByProductIdAndSellerId(int productId, int sellerId);
 
