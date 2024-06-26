@@ -151,6 +151,7 @@ public class CustomerController {
         return orderHistory;
     }
 
+
     @Transactional
     @PostMapping("/api/customers/{customerId}/payment")
     public void placeOrderAndMakePayment(@PathVariable int customerId, @RequestBody Payment paymentRequest) throws InsufficientStockException {

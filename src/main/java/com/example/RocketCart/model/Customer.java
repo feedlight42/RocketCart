@@ -19,6 +19,7 @@ public class Customer {
 
     // In Customer entity
     @OneToMany(mappedBy = "customerId")
+    @OrderBy("cartItemId ASC")
     private List<Cart> cartItems;
 
 
