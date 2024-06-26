@@ -55,7 +55,7 @@ public class SellerController {
         Integer sort = 0;
         Sort.Direction sortDirection = (sort == 1) ? Sort.Direction.DESC : Sort.Direction.ASC;
         pageable = PageRequest.of(page, size, Sort.by(sortDirection, "productId"));
-        Page<Product> products = productRepository.findBySellerIdAndProductNameContaining(sellerId, searchKeyword, pageable);
+        Page<Product> products = productRepository.findBySellerIdAndProductNameContainingAndDeletedFalse(sellerId, searchKeyword, pageable);
         if (products.hasContent()) {
             return ResponseEntity.ok(products);
         } else {
@@ -77,7 +77,7 @@ public class SellerController {
 //
     @PutMapping("/{sellerId}/products/{productId}")
     public ResponseEntity<Product> updateProduct(@PathVariable int sellerId, @PathVariable int productId, @RequestBody Product productDetails) {
-        Product existingProduct = productRepository.findByProductIdAndSellerId(productId, sellerId);
+        Product existingProduct = productRepository.findByProductIdAndSellerIdAndDeletedFalse(productId, sellerId);
         if (existingProduct == null) {
             return ResponseEntity.notFound().build();
         }
@@ -91,7 +91,7 @@ public class SellerController {
 
     @DeleteMapping("/{sellerId}/products/{productId}")
     public ResponseEntity<Void> deleteProduct(@PathVariable int sellerId, @PathVariable int productId) {
-        Product product = productRepository.findByProductIdAndSellerId(productId, sellerId);
+        Product product = productRepository.findByProductIdAndSellerIdAndDeletedFalse(productId, sellerId);
         if (product == null) {
             return ResponseEntity.notFound().build();
         }
@@ -99,6 +99,24 @@ public class SellerController {
         return ResponseEntity.noContent().build();
     }
 
+    @PostMapping("/{productId}/toggle-disable")
+    public ResponseEntity<Product> toggleProductDisableState(@PathVariable Integer productId) {
+
+        // Check if the product exists
+        Product product = productRepository.findById(productId).orElse(null);
+        if (product == null) {
+            return ResponseEntity.notFound().build();
+        }
+
+        // Toggle the isDisabled state
+        product.setDisabled(!product.isDisabled());
+
+        // Save the updated product
+        Product updatedProduct = productRepository.save(product);
+
+        // Return the updated product in the response
+        return ResponseEntity.ok(updatedProduct);
+    }
 
 }
 

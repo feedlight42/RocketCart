@@ -1,41 +1,57 @@
 package com.example.RocketCart.repository;
-import com.example.RocketCart.model.Customer;
+
 import com.example.RocketCart.model.Product;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.data.jpa.repository.Query;
+import org.springframework.stereotype.Repository;
 
-import java.util.List;
-
+@Repository
 public interface ProductRepository extends JpaRepository<Product, Integer> {
 
-    Page<Product> findByPriceBetweenAndCategoryNameContainingIgnoreCaseAndProductNameContainingIgnoreCase(Double minPrice, Double maxPrice, String categoryName, String productName, Pageable pageable);
-    Page<Product> findByPriceBetweenAndProductNameContainingIgnoreCase(Double minPrice, Double maxPrice, String productName, Pageable pageable);
-    Page<Product> findByCategoryNameContainingIgnoreCaseAndProductNameContainingIgnoreCase(String categoryName, String productName, Pageable pageable);
-    Page<Product> findByProductNameContainingIgnoreCase(String productName, Pageable pageable);
+    // Soft deletion queries
+    Page<Product> findByPriceBetweenAndCategoryNameContainingIgnoreCaseAndProductNameContainingIgnoreCaseAndDeletedFalse(
+            Double minPrice, Double maxPrice, String categoryName, String productName, Pageable pageable);
 
-//    List<Product> findBySellerId(int sellerId);
+    Page<Product> findByPriceBetweenAndProductNameContainingIgnoreCaseAndDeletedFalse(
+            Double minPrice, Double maxPrice, String productName, Pageable pageable);
 
-    Page<Product> findBySellerId(int sellerId, Pageable pageable);
+    Page<Product> findByCategoryNameContainingIgnoreCaseAndProductNameContainingIgnoreCaseAndDeletedFalse(
+            String categoryName, String productName, Pageable pageable);
 
-    Product findByProductIdAndSellerId(int productId, int sellerId);
+    Page<Product> findByProductNameContainingIgnoreCaseAndDeletedFalse(
+            String productName, Pageable pageable);
 
-    Page<Product> findByPriceBetweenAndCategoryName(Double minPrice, Double maxPrice, String categoryName, Pageable pageable);
+    Page<Product> findBySellerIdAndDeletedFalse(
+            int sellerId, Pageable pageable);
 
-    Page<Product> findByPriceBetween(Double minPrice, Double maxPrice, Pageable pageable);
+    Product findByProductIdAndSellerIdAndDeletedFalse(
+            int productId, int sellerId);
 
-    Page<Product> findByCategoryName(String categoryName, Pageable pageable);
+    Page<Product> findByPriceBetweenAndCategoryNameAndDeletedFalse(
+            Double minPrice, Double maxPrice, String categoryName, Pageable pageable);
 
-    Page<Product> findByPriceBetweenAndCategoryNameContaining(Double minPrice, Double maxPrice, String categoryName, Pageable pageable);
+    Page<Product> findByPriceBetweenAndDeletedFalse(
+            Double minPrice, Double maxPrice, Pageable pageable);
 
-    Page<Product> findByCategoryNameContaining(String categoryName, Pageable pageable);
+    Page<Product> findByCategoryNameAndDeletedFalse(
+            String categoryName, Pageable pageable);
 
-    Page<Product> findByPriceBetweenAndCategoryNameContainingAndProductNameContaining(Double minPrice, Double maxPrice, String categoryName, String searchKeyword, Pageable pageable);
+    Page<Product> findByPriceBetweenAndCategoryNameContainingAndDeletedFalse(
+            Double minPrice, Double maxPrice, String categoryName, Pageable pageable);
 
-    Page<Product> findByPriceBetweenAndProductNameContaining(Double minPrice, Double maxPrice, String searchKeyword, Pageable pageable);
+    Page<Product> findByCategoryNameContainingAndDeletedFalse(
+            String categoryName, Pageable pageable);
 
-    Page<Product> findByCategoryNameContainingAndProductNameContaining(String categoryName, String searchKeyword, Pageable pageable);
+    Page<Product> findByPriceBetweenAndCategoryNameContainingAndProductNameContainingAndDeletedFalse(
+            Double minPrice, Double maxPrice, String categoryName, String searchKeyword, Pageable pageable);
 
-    Page<Product> findBySellerIdAndProductNameContaining(int sellerId, String searchKeyword, Pageable pageable);
+    Page<Product> findByPriceBetweenAndProductNameContainingAndDeletedFalse(
+            Double minPrice, Double maxPrice, String searchKeyword, Pageable pageable);
+
+    Page<Product> findByCategoryNameContainingAndProductNameContainingAndDeletedFalse(
+            String categoryName, String searchKeyword, Pageable pageable);
+
+    Page<Product> findBySellerIdAndProductNameContainingAndDeletedFalse(
+            int sellerId, String searchKeyword, Pageable pageable);
 }

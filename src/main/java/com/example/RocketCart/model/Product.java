@@ -21,6 +21,9 @@ public class Product {
 
     private Integer sellerId;
 
+    private Boolean deleted = false;  // Add the delete
+    private boolean isDisabled = false;
+
     public Integer getProductId() {
         return productId;
     }
@@ -83,6 +86,22 @@ public class Product {
 
     public void setImageUrl(String imageUrl) {
         this.imageUrl = imageUrl;
+    }
+
+    public Boolean getDeleted() {
+        return deleted;
+    }
+
+    public void setDeleted(Boolean deleted) {
+        this.deleted = deleted;
+    }
+
+    public boolean isDisabled() {
+        return isDisabled;
+    }
+
+    public void setDisabled(boolean disabled) {
+        isDisabled = disabled;
     }
 
     // Getters and setters
