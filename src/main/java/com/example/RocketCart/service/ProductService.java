@@ -31,5 +31,21 @@ public class ProductService {
         }
     }
 
+    public Page<Product> findAllByPriceCategoryAndSearchKeyword(Pageable pageable, Double minPrice, Double maxPrice, String categoryName, String searchKeyword) {
+        if (searchKeyword != null && !searchKeyword.isEmpty()) {
+            if (minPrice != null && maxPrice != null && categoryName != null) {
+                return productRepository.findByPriceBetweenAndCategoryNameContainingAndProductNameContaining(minPrice, maxPrice, categoryName, searchKeyword, pageable);
+            } else if (minPrice != null && maxPrice != null) {
+                return productRepository.findByPriceBetweenAndProductNameContaining(minPrice, maxPrice, searchKeyword, pageable);
+            } else if (categoryName != null) {
+                return productRepository.findByCategoryNameContainingAndProductNameContaining(categoryName, searchKeyword, pageable);
+            } else {
+                return productRepository.findByProductNameContaining(searchKeyword, pageable);
+            }
+        } else {
+            return findAllByPriceAndCategory(pageable, minPrice, maxPrice, categoryName);
+        }
+    }
+
 
 }

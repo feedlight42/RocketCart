@@ -67,6 +67,8 @@ public class SellerController {
         return ResponseEntity.ok(productDetails);
     }
 
+
+
     @DeleteMapping("/{sellerId}/products/{productId}")
     public ResponseEntity<Void> deleteProduct(@PathVariable int sellerId, @PathVariable int productId) {
         Product product = productRepository.findByProductIdAndSellerId(productId, sellerId);

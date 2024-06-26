@@ -1,6 +1,7 @@
 package com.example.RocketCart.model;
 
 import jakarta.persistence.*;
+import jakarta.persistence.criteria.CriteriaBuilder;
 
 import java.util.List;
 
@@ -14,8 +15,8 @@ public class Cart {
 
 
     private Integer customerId;
-
-
+//
+//    private Integer productId;
 
     @ManyToOne()
     @JoinColumn(name = "productId", referencedColumnName = "productId")
@@ -55,6 +56,14 @@ public class Cart {
     public void setProduct(Product product) {
         this.product = product;
     }
+
+//    public Integer getProductId() {
+//        return productId;
+//    }
+//
+//    public void setProductId(Integer productId) {
+//        this.productId = productId;
+//    }
 
 
     // Getters and setters

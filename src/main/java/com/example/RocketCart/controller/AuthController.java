@@ -1,7 +1,9 @@
 package com.example.RocketCart.controller;
 
 import com.example.RocketCart.model.Customer;
+import com.example.RocketCart.model.Seller;
 import com.example.RocketCart.repository.CustomerRepository;
+import com.example.RocketCart.repository.SellerRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -21,6 +23,9 @@ public class AuthController {
 
     @Autowired
     private CustomerRepository customerRepository;
+
+    @Autowired
+    private SellerRepository sellerRepository;
 
 
     @PostMapping("/signup")
@@ -56,6 +61,30 @@ public class AuthController {
         return ResponseEntity.ok(user);
 
     }
+
+    @PostMapping("/sellerlogin")
+    public ResponseEntity<?> sellerlogin(@RequestBody Map<String, String> signUpRequest) {
+
+        String username = signUpRequest.get("companyName");
+        String password = signUpRequest.get("password");
+
+        if (username == null || password == null) {
+            return ResponseEntity.badRequest().body("Username and password are required");
+        }
+
+        Seller user;
+        user = sellerRepository.findByCompanyName(username);
+
+        if (user == null || !user.getPassword().equals(password)) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid username or password");
+        }
+
+        return ResponseEntity.ok(user);
+
+    }
+
+
+
 
 
 }

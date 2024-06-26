@@ -14,6 +14,7 @@ import java.math.BigDecimal;
 import java.text.DecimalFormat;
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 @RestController
@@ -120,6 +121,29 @@ public class CustomerController {
         return new ResponseEntity<>(HttpStatus.NOT_FOUND);
     }
 
+    @PatchMapping("/api/customers/{customerId}/cart/{cartId}")
+    public ResponseEntity<Cart> updateCartItemQuantity(
+            @PathVariable Long customerId,
+            @PathVariable Integer cartId,
+            @RequestBody Map<String, Object> updatedFields) {
+
+        // Check if the cart item exists
+        Optional<Cart> cartOptional = cartRepository.findById(cartId);
+        if (cartOptional.isPresent()) {
+            Cart existingCart = cartOptional.get();
+
+            // Update fields from request body
+            if (updatedFields.containsKey("quantity")) {
+                existingCart.setQuantity((Integer) updatedFields.get("quantity"));
+            }
+
+            // Save the updated cart item
+            Cart updatedCartItem = cartRepository.save(existingCart);
+            return ResponseEntity.ok(updatedCartItem);
+        }
+
+        return ResponseEntity.notFound().build();
+    }
 
     @GetMapping("/api/customers/{customerId}/orderhistory")
     public List<OrderTable> getOrderHistory(@PathVariable int customerId) {
