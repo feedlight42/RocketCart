@@ -1,7 +1,8 @@
 package com.example.RocketCart.controller;
 
-import com.example.RocketCart.model.Product;
-import com.example.RocketCart.model.Seller;
+import com.example.RocketCart.model.*;
+import com.example.RocketCart.repository.OrderDetailRepository;
+import com.example.RocketCart.repository.OrderTableRepository;
 import com.example.RocketCart.repository.ProductRepository;
 import com.example.RocketCart.repository.SellerRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -12,9 +13,18 @@ import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-
+import java.text.SimpleDateFormat;
+import java.time.LocalDate;
+import java.time.ZoneId;
+import java.util.*;
+import java.util.stream.Collectors;
+import java.math.BigDecimal;
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/api/sellers")
@@ -25,6 +35,12 @@ public class SellerController {
 
     @Autowired
     private ProductRepository productRepository;
+
+    @Autowired
+    private OrderDetailRepository orderDetailRepository;
+
+    @Autowired
+    private OrderTableRepository orderTableRepository;
 
     @GetMapping("/{sellerId}")
     public ResponseEntity<Seller> getSellerDetails(@PathVariable int sellerId) {
@@ -73,6 +89,187 @@ public class SellerController {
 
 
 //    YET TO TEST ------------
+
+
+//    ERROR
+
+
+
+    @GetMapping("/{sellerId}/products/{productId}/sold")
+    public ResponseEntity<?> getproductssold(@PathVariable int sellerId, @PathVariable int productId, @RequestBody Product productDetails) {
+
+        Product existingProduct = productRepository.findByProductIdAndSellerIdAndDeletedFalse(productId, sellerId);
+
+        if (existingProduct == null) {
+            return ResponseEntity.notFound().build();
+        }
+
+        List<OrderDetail> orderDetails = orderDetailRepository.findByProduct(existingProduct);
+
+
+        int totalQuantitySold = orderDetails.stream()
+                .mapToInt(OrderDetail::getQuantity)
+                .sum();
+
+        // Return the total quantity sold as the response
+        return ResponseEntity.ok(totalQuantitySold);
+
+    }
+
+
+    @GetMapping("/{sellerId}/demo")
+    public List<Object[]> demo(@PathVariable Integer sellerId){
+        List<Object[]> h = orderDetailRepository.getProductValuesLast6MonthsSeller(sellerId);
+        return  h;
+    }
+
+
+    @GetMapping("/{sellerId}/statistics")
+    public ResponseEntity<SellerStatisticsDto> getSellerStatistics(@PathVariable Integer sellerId) {
+        // Retrieve all products for the seller
+        List<Product> products = productRepository.findProductBySellerId(sellerId);
+
+
+        if (products.isEmpty()) {
+            return ResponseEntity.notFound().build();
+        }
+
+
+
+        List<OrderDetail> orderDetails = orderDetailRepository.findByProductIn(products);
+
+        // Retrieve all order IDs from the order details
+        List<Integer> orderIds = orderDetails.stream()
+                .map(OrderDetail::getOrderId)
+                .collect(Collectors.toList());
+
+        // Retrieve all orders by order IDs
+        List<OrderTable> orders = orderTableRepository.findByOrderIdIn(orderIds);
+
+        // Map order IDs to their corresponding order dates
+        Map<Integer, LocalDate> orderDateMap = orders.stream()
+                .collect(Collectors.toMap(
+                        OrderTable::getOrderId,
+                        order -> order.getOrderDate().toInstant().atZone(ZoneId.systemDefault()).toLocalDate()
+                ));
+
+        // Initialize total revenue
+        double totalRevenue = 0.0;
+
+        // Calculate total revenue by iterating through order details
+        for (OrderDetail orderDetail : orderDetails) {
+            totalRevenue += orderDetail.getQuantity() * orderDetail.getProduct().getPrice();
+        }
+
+        // Calculate monthly revenue and count for the last 6 months
+        LocalDate currentDate = LocalDate.now();
+        LocalDate date6MonthsAgo = currentDate.minusMonths(6);
+
+        Map<String, Double> monthlyRevenue = new TreeMap<>();
+        Map<String, Double> monthlyCount = new TreeMap<>();
+
+        // Initialize maps with the last 6 months
+        for (int i = 0; i < 6; i++) {
+            LocalDate month = currentDate.minusMonths(i);
+            String monthKey = month.getYear() + "-" + String.format("%02d", month.getMonthValue());
+            monthlyRevenue.put(monthKey, 0.0);
+            monthlyCount.put(monthKey, 0.0);
+        }
+
+        // Populate maps with order details
+        for (OrderDetail orderDetail : orderDetails) {
+            LocalDate orderDate = orderDateMap.get(orderDetail.getOrderId());
+            if (orderDate != null && !orderDate.isBefore(date6MonthsAgo)) {
+                String monthKey = orderDate.getYear() + "-" + String.format("%02d", orderDate.getMonthValue());
+                monthlyRevenue.put(monthKey, monthlyRevenue.get(monthKey) + (orderDetail.getQuantity() * orderDetail.getProduct().getPrice()));
+                monthlyCount.put(monthKey, monthlyCount.get(monthKey) + 1);
+            }
+        }
+
+        // Create statistics DTO
+        SellerStatisticsDto statistics = new SellerStatisticsDto(totalRevenue, monthlyRevenue, monthlyCount);
+
+        // Return the statistics
+        return ResponseEntity.ok(statistics);
+    }
+
+
+
+
+
+//        // Retrieve all order details containing those products
+//        List<OrderDetail> orderDetails = orderDetailRepository.findByProductIn(products);
+//
+//        // Initialize total amount
+//        double totalRevenue = 0.0;
+//
+//        // Calculate total revenue by iterating through order details
+//        for (OrderDetail orderDetail : orderDetails) {
+//            totalRevenue += orderDetail.getQuantity() * orderDetail.getProduct().getPrice();
+//        }
+//
+//        List<Integer> orderIds = orderDetails.stream()
+//                .map(OrderDetail::getOrderId)
+//                .collect(Collectors.toList());
+//
+//        // Retrieve all orders by order IDs
+//        List<OrderTable> orders = orderTableRepository.findByOrderIdIn(orderIds);
+//
+//        // Map order IDs to their corresponding order dates
+//        Map<Integer, LocalDate> orderDateMap = orders.stream()
+//                .collect(Collectors.toMap(
+//                        OrderTable::getOrderId,
+//                        order -> order.getOrderDate().toInstant().atZone(ZoneId.systemDefault()).toLocalDate()
+//                ));
+//
+//        LocalDate currentDate = LocalDate.now();
+//        LocalDate date6MonthsAgo = currentDate.minusMonths(6);
+//
+//        Map<String, Double> monthlyRevenue = new TreeMap<>();
+//        for (OrderDetail orderDetail : orderDetails) {
+//            LocalDate orderDate = orderDateMap.get(orderDetail.getOrderId());
+//            if (!orderDate.isBefore(date6MonthsAgo)) {
+//                String monthKey = orderDate.getYear() + "-" + String.format("%02d", orderDate.getMonthValue());
+//                monthlyRevenue.put(monthKey, monthlyRevenue.getOrDefault(monthKey, 0.0) + (orderDetail.getQuantity() * orderDetail.getProduct().getPrice()));
+//            }
+//        }
+
+
+
+//        // Retrieve all order IDs from the order details
+//        List<Integer> orderIds = orderDetails.stream()
+//                .map(OrderDetail::getOrderId)
+//                .collect(Collectors.toList());
+//
+//        // Retrieve all orders by order IDs
+//        List<OrderTable> orders = orderTableRepository.findByOrderIdIn(orderIds);
+//
+//        // Calculate total revenue
+//        Double totalRevenue = orders.stream()
+//                .mapToDouble(OrderTable::getTotalAmount)
+//                .sum();
+//
+//        // Calculate monthly revenue for the last 12 months
+//        Map<String, Double> monthlyRevenue = orders.stream()
+//                .filter(order -> {
+//                    Calendar cal = Calendar.getInstance();
+//                    cal.add(Calendar.MONTH, -12);
+//                    return order.getOrderDate().after(cal.getTime());
+//                })
+//                .collect(Collectors.groupingBy(
+//                        order -> new SimpleDateFormat("yyyy-MM").format(order.getOrderDate()),
+//                        TreeMap::new,
+//                        Collectors.summingDouble(OrderTable::getTotalAmount)
+//                ));
+//
+//        // Create statistics DTO
+//        SellerStatisticsDto statistics = new SellerStatisticsDto(totalRevenue, monthlyRevenue);
+//
+//        // Return the statistics
+//        return ResponseEntity.ok(statistics);
+
+
+
 
 //
     @PutMapping("/{sellerId}/products/{productId}")

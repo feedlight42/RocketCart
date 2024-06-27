@@ -17,6 +17,9 @@ public class Customer {
     private String phoneNumber;
     private String billingAddress;
 
+    @Lob
+    private byte[] imageData;
+
     // In Customer entity
     @OneToMany(mappedBy = "customerId")
     @OrderBy("cartItemId ASC")
@@ -85,6 +88,14 @@ public class Customer {
 
     public void setCartItems(List<Cart> cartItems) {
         this.cartItems = cartItems;
+    }
+
+    public byte[] getImageData() {
+        return imageData;
+    }
+
+    public void setImageData(byte[] imageData) {
+        this.imageData = imageData;
     }
 
     // Getters and setters

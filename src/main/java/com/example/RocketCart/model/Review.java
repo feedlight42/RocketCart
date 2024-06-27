@@ -11,15 +11,15 @@ public class Review {
     private Integer rating;
     private String comment;
 
-//    @ManyToOne
-//    @JoinColumn(name = "customer_id")
-//    private Customer customer;
-//
+    @ManyToOne
+    @JoinColumn(name = "customer_id")
+    private Customer customer;
+
 //    @ManyToOne
 //    @JoinColumn(name = "product_id")
 //    private Product product;
 
-    private Integer customerId;
+//    private Integer customerId;
     private Integer productId;
 
     public Integer getReviewId() {
@@ -62,13 +62,13 @@ public class Review {
 //        this.product = product;
 //    }
 
-    public Integer getCustomerId() {
-        return customerId;
-    }
-
-    public void setCustomerId(Integer customerId) {
-        this.customerId = customerId;
-    }
+//    public Integer getCustomerId() {
+//        return customerId;
+//    }
+//
+//    public void setCustomerId(Integer customerId) {
+//        this.customerId = customerId;
+//    }
 
     public Integer getProductId() {
         return productId;
@@ -76,6 +76,14 @@ public class Review {
 
     public void setProductId(Integer productId) {
         this.productId = productId;
+    }
+
+    public Customer getCustomer() {
+        return customer;
+    }
+
+    public void setCustomer(Customer customer) {
+        this.customer = customer;
     }
 
     // Getters and setters

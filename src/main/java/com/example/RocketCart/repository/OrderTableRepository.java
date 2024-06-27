@@ -8,4 +8,6 @@ public interface OrderTableRepository extends JpaRepository<OrderTable, Integer>
     List<OrderTable> findAllByCustomerId(int customerId);
 
     List<OrderTable> findAllByCustomerIdOrderByOrderDateDesc(int customerId);
+
+    List<OrderTable> findByOrderIdIn(List<Integer> orderIds);
 }

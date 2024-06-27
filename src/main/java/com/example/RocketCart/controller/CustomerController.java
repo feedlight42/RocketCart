@@ -6,10 +6,13 @@ import com.example.RocketCart.repository.*;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.transaction.annotation.Isolation;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
 import java.math.BigDecimal;
 import java.text.DecimalFormat;
 import java.util.Date;
@@ -41,13 +44,43 @@ public class CustomerController {
     }
 
 
+    @PostMapping("/{customerId}/uploadProfilePicture")
+    public ResponseEntity<?> uploadProfilePicture(@PathVariable Integer customerId, @RequestParam("file") MultipartFile file) {
+        try {
+            Customer customer = customerRepository.findByCustomerId(customerId);
+            if (customer == null) {
+                return ResponseEntity.notFound().build();
+            }
+
+            customer.setImageData(file.getBytes());
+            customerRepository.save(customer);
+
+            return ResponseEntity.ok().body("Profile picture uploaded successfully for customer ID: " + customerId);
+        } catch (IOException e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Failed to upload profile picture");
+        }
+    }
+
+    @GetMapping("/{customerId}/profilePicture")
+    public ResponseEntity<byte[]> getProfilePicture(@PathVariable Integer customerId) {
+        Customer customer = customerRepository.findByCustomerId(customerId);
+        if (customer != null && customer.getImageData() != null) {
+            return ResponseEntity.ok()
+                    .contentType(MediaType.IMAGE_JPEG) // Adjust content type based on your image format
+                    .body(customer.getImageData());
+        } else {
+            return ResponseEntity.notFound().build();
+        }
+    }
+
+
     @PostMapping("/api/customers")
     public ResponseEntity<Customer> createCustomer(@RequestBody Customer customer) {
         Customer newCustomer = customerRepository.save(customer);
         return new ResponseEntity<>(newCustomer, HttpStatus.CREATED);
     }
 
-    @GetMapping("/api/customers/{customerId}")
+    @GetMapping("/api/login/{customerId}")
     public ResponseEntity<Customer> getCustomerById(@PathVariable Integer customerId) {
         Optional<Customer> customerOptional = customerRepository.findById(customerId);
         return customerOptional.map(customer -> new ResponseEntity<>(customer, HttpStatus.OK))
@@ -236,7 +269,7 @@ public class CustomerController {
         Optional<Customer> customerOptional = customerRepository.findById(customerId);
 
         if (customerOptional.isPresent()) {
-            List<Review> reviews = reviewRepository.findByCustomerId(customerId);
+            List<Review> reviews = reviewRepository.findByCustomer(customerOptional.get());
             return new ResponseEntity<>(reviews, HttpStatus.OK);
         } else {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
@@ -250,7 +283,7 @@ public class CustomerController {
         Optional<Product> productOptional = productRepository.findById(productId);
 
         if (customerOptional.isPresent() && productOptional.isPresent()) {
-            review.setCustomerId(customerId);
+            review.setCustomer(customerOptional.get());
             review.setProductId(productId);
 
             Review savedReview = reviewRepository.save(review);
@@ -268,7 +301,7 @@ public class CustomerController {
         Optional<Product> productOptional = productRepository.findById(productId);
 
         if (customerOptional.isPresent() && productOptional.isPresent()) {
-            boolean exists = reviewRepository.existsByCustomerIdAndProductId(customerId, productId);
+            boolean exists = reviewRepository.existsByCustomerAndProductId(customerOptional.get(), productId);
             return new ResponseEntity<>(exists, HttpStatus.OK);
         } else {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
@@ -286,7 +319,7 @@ public class CustomerController {
             Review existingReview = reviewOptional.get();
 
             // Check if the review belongs to the customer
-            if (!existingReview.getCustomerId().equals(customerId)) {
+            if (!existingReview.getCustomer().getCustomerId().equals(customerId)) {
                 return new ResponseEntity<>(HttpStatus.FORBIDDEN);
             }
 
@@ -304,10 +337,6 @@ public class CustomerController {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
     }
-
-
-
-
 
 }
 
