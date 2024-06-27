@@ -1,7 +1,9 @@
 package com.example.RocketCart.controller;
 
 import com.example.RocketCart.model.Product;
+import com.example.RocketCart.model.Review;
 import com.example.RocketCart.repository.ProductRepository;
+import com.example.RocketCart.repository.ReviewRepository;
 import com.example.RocketCart.service.ProductService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -10,10 +12,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 import java.util.Optional;
@@ -23,11 +22,13 @@ public class ProductController {
 
     private final ProductRepository productRepository;
     private final ProductService productService;
+    private final ReviewRepository reviewRepository;
 
     @Autowired
-    public ProductController(ProductRepository productRepository, ProductService productService) {
+    public ProductController(ProductRepository productRepository, ProductService productService, ReviewRepository reviewRepository) {
         this.productRepository = productRepository;
         this.productService = productService;
+        this.reviewRepository = reviewRepository;
     }
 
 //    @GetMapping("/api/products")
@@ -89,6 +90,33 @@ public class ProductController {
         return productOptional.map(product -> new ResponseEntity<>(product, HttpStatus.OK))
                 .orElseGet(() -> new ResponseEntity<>(HttpStatus.NOT_FOUND));
 
+    }
+
+    @GetMapping("/api/products/{productId}/reviews")
+    public ResponseEntity<List<Review>> getReviewsForProduct(@PathVariable Integer productId) {
+        Optional<Product> productOptional = productRepository.findById(productId);
+
+        if (productOptional.isPresent()) {
+            List<Review> reviews = reviewRepository.findByProduct(productOptional.get());
+            return new ResponseEntity<>(reviews, HttpStatus.OK);
+        } else {
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
+    }
+
+    @PostMapping("/api/products/{productId}/reviews")
+    public ResponseEntity<Review> createReviewForProduct(@PathVariable Integer productId, @RequestBody Review review) {
+        Optional<Product> productOptional = productRepository.findById(productId);
+
+        if (productOptional.isPresent()) {
+            Product product = productOptional.get();
+            review.setProduct(product);
+
+            Review newReview = reviewRepository.save(review);
+            return new ResponseEntity<>(newReview, HttpStatus.CREATED);
+        } else {
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
     }
 
 }

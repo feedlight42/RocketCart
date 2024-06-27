@@ -26,9 +26,10 @@ public class CustomerController {
     private final OrderDetailRepository orderDetailRepository;
     private final PaymentRepository paymentRepository;
     private final ProductRepository productRepository;
+    private final ReviewRepository reviewRepository;
 
     @Autowired
-    public CustomerController(CustomerRepository customerRepository, CartRepository cartRepository, OrderTableRepository orderRepository, OrderDetailRepository orderDetailRepository, PaymentRepository paymentRepository, ProductRepository productRepository) {
+    public CustomerController(CustomerRepository customerRepository, CartRepository cartRepository, OrderTableRepository orderRepository, OrderDetailRepository orderDetailRepository, PaymentRepository paymentRepository, ProductRepository productRepository, ReviewRepository reviewRepository) {
         this.customerRepository = customerRepository;
         this.cartRepository = cartRepository;
         this.orderTableRepository = orderRepository;
@@ -36,6 +37,7 @@ public class CustomerController {
         this.paymentRepository = paymentRepository;
         this.productRepository = productRepository;
 
+        this.reviewRepository = reviewRepository;
     }
 
 
@@ -222,6 +224,42 @@ public class CustomerController {
         cartRepository.deleteAllByCustomerId(customerId);
     }
 
+
+
+
+
+
+//    IMPLEMENTING CUSTOMER SIDE REVIEW ENDPOINTS
+
+    // Endpoint to get all reviews of a customer
+    @GetMapping("api/customers/{customerId}/reviews")
+    public ResponseEntity<List<Review>> getAllReviewsForCustomer(@PathVariable Integer customerId) {
+        Optional<Customer> customerOptional = customerRepository.findById(customerId);
+
+        if (customerOptional.isPresent()) {
+            List<Review> reviews = reviewRepository.findByCustomer(customerOptional.get());
+            return new ResponseEntity<>(reviews, HttpStatus.OK);
+        } else {
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
+    }
+
+
+    @PostMapping("api/customers/{customerId}/reviews")
+    public ResponseEntity<Review> addReviewForCustomer(@PathVariable Integer customerId, @RequestParam Integer productId, @RequestBody Review review) {
+        Optional<Customer> customerOptional = customerRepository.findById(customerId);
+        Optional<Product> productOptional = productRepository.findById(productId);
+
+        if (customerOptional.isPresent() && productOptional.isPresent()) {
+            review.setCustomer(customerOptional.get());
+            review.setProduct(productOptional.get());
+
+            Review savedReview = reviewRepository.save(review);
+            return new ResponseEntity<>(savedReview, HttpStatus.CREATED);
+        } else {
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
+    }
 
 }
 

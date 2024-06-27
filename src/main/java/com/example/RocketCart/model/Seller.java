@@ -8,7 +8,7 @@ public class Seller {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer sellerId;
-    private String companyName;
+    private String username;
     private String email;
     private String password;
     private String phoneNumber;
@@ -21,12 +21,12 @@ public class Seller {
         this.sellerId = sellerId;
     }
 
-    public String getCompanyName() {
-        return companyName;
+    public String getUsername() {
+        return username;
     }
 
-    public void setCompanyName(String companyName) {
-        this.companyName = companyName;
+    public void setUsername(String companyName) {
+        this.username = companyName;
     }
 
     public String getEmail() {
@@ -55,3 +55,5 @@ public class Seller {
 
     // Getters and setters
 }
+
+

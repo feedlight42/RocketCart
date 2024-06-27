@@ -64,4 +64,18 @@ public class AdminController {
         Optional<Customer> customer = customerRepository.findById(id);
         return customer.map(ResponseEntity::ok).orElseGet(() -> ResponseEntity.notFound().build());
     }
+
+    @DeleteMapping("/customers/{id}")
+    public ResponseEntity<Void> deleteCustomerById(@PathVariable Integer id) {
+        Optional<Customer> customer = customerRepository.findById(id);
+        if (customer.isPresent()) {
+            customerRepository.deleteById(id);
+            return ResponseEntity.noContent().build();
+        } else {
+            return ResponseEntity.notFound().build();
+        }
+    }
+
+
+
 }
