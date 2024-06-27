@@ -149,8 +149,7 @@ public class CustomerController {
 
     @GetMapping("/api/customers/{customerId}/orderhistory")
     public List<OrderTable> getOrderHistory(@PathVariable int customerId) {
-        List<OrderTable> orderHistory = orderTableRepository.findAllByCustomerId(customerId);
-        return orderHistory;
+        return orderTableRepository.findAllByCustomerIdOrderByOrderDateDesc(customerId);
     }
 
     @GetMapping("/api/customers/{customerId}/orderhistory/{orderId}")

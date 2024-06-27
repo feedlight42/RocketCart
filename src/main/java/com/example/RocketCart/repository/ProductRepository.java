@@ -57,5 +57,7 @@ public interface ProductRepository extends JpaRepository<Product, Integer> {
     Page<Product> findBySellerIdAndProductNameContainingAndDeletedFalse(
             int sellerId, String searchKeyword, Pageable pageable);
 
-    Optional<Product> findByIdAndDeletedFalse(Integer productId);
+
+    Optional<Product> findByProductIdAndDeletedFalse(Integer productId);
 }
+

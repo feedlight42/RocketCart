@@ -6,4 +6,6 @@ import java.util.List;
 
 public interface OrderTableRepository extends JpaRepository<OrderTable, Integer> {
     List<OrderTable> findAllByCustomerId(int customerId);
+
+    List<OrderTable> findAllByCustomerIdOrderByOrderDateDesc(int customerId);
 }

@@ -86,7 +86,7 @@ public class ProductController {
     @GetMapping("/api/products/{productId}")
     public ResponseEntity<Product> getProductById(@PathVariable Integer productId) {
 
-        Optional<Product> productOptional = productRepository.findByIdAndDeletedFalse(productId);
+        Optional<Product> productOptional = productRepository.findByProductIdAndDeletedFalse(productId);
         return productOptional.map(product -> new ResponseEntity<>(product, HttpStatus.OK))
                 .orElseGet(() -> new ResponseEntity<>(HttpStatus.NOT_FOUND));
 
