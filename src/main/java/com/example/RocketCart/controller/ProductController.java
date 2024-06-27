@@ -104,6 +104,21 @@ public class ProductController {
         }
     }
 
+    @GetMapping("/api/products/{productId}/average-rating")
+    public ResponseEntity<Double> getAverageRatingForProduct(@PathVariable Integer productId) {
+        Optional<Product> productOptional = productRepository.findById(productId);
+
+        if (productOptional.isPresent()) {
+            Double averageRating = reviewRepository.findAverageRatingByProductId(productId);
+            if (averageRating == null) {
+                averageRating = 0.0; // No reviews yet
+            }
+            return new ResponseEntity<>(averageRating, HttpStatus.OK);
+        } else {
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
+    }
+
     @PostMapping("/api/products/{productId}/reviews")
     public ResponseEntity<Review> createReviewForProduct(@PathVariable Integer productId, @RequestBody Review review) {
         Optional<Product> productOptional = productRepository.findById(productId);

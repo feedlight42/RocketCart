@@ -12,6 +12,7 @@ public class Seller {
     private String email;
     private String password;
     private String phoneNumber;
+    private Boolean verified;
 
     public Integer getSellerId() {
         return sellerId;
@@ -51,6 +52,14 @@ public class Seller {
 
     public void setPhoneNumber(String phoneNumber) {
         this.phoneNumber = phoneNumber;
+    }
+
+    public Boolean getVerified() {
+        return verified;
+    }
+
+    public void setVerified(Boolean verified) {
+        this.verified = verified;
     }
 
     // Getters and setters

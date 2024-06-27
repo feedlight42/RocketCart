@@ -99,7 +99,7 @@ public class SellerController {
         return ResponseEntity.noContent().build();
     }
 
-    @PostMapping("/{productId}/toggle-disable")
+    @PostMapping("{sellerId}/products/{productId}/toggle-disable")
     public ResponseEntity<Product> toggleProductDisableState(@PathVariable Integer productId) {
 
         // Check if the product exists

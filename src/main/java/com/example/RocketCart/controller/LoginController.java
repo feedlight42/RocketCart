@@ -81,7 +81,7 @@ public class LoginController {
     }
 
 
-    @PostMapping("/signup")
+    @PostMapping("/signup/user")
     public String signup(@RequestBody Customer user) {
         // Check if the username is already taken
 //        if (userDetailsService.loadUserByUsername(user.getUsername()).isPresent()) {
@@ -94,6 +94,22 @@ public class LoginController {
 
         // Save the user to the database
         customerRepository.save(user);
+        return "User registered successfully";
+    }
+
+    @PostMapping("/signup/seller")
+    public String signupSeller(@RequestBody Seller user) {
+        // Check if the username is already taken
+//        if (userDetailsService.loadUserByUsername(user.getUsername()).isPresent()) {
+//            return "Username is already taken";
+//        }
+
+        // Hash the password before saving
+        user.setPassword(passwordEncoder.encode(user.getPassword()));
+        // Set the default role to USER
+
+        // Save the user to the database
+        sellerRepository.save(user);
         return "User registered successfully";
     }
 

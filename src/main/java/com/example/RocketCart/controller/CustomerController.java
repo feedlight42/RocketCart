@@ -244,8 +244,8 @@ public class CustomerController {
     }
 
 
-    @PostMapping("api/customers/{customerId}/reviews")
-    public ResponseEntity<Review> addReviewForCustomer(@PathVariable Integer customerId, @RequestParam Integer productId, @RequestBody Review review) {
+    @PostMapping("api/customers/{customerId}/products/{productId}/reviews")
+    public ResponseEntity<Review> addReviewForCustomer(@PathVariable Integer customerId, @PathVariable Integer productId, @RequestBody Review review) {
         Optional<Customer> customerOptional = customerRepository.findById(customerId);
         Optional<Product> productOptional = productRepository.findById(productId);
 
@@ -262,8 +262,8 @@ public class CustomerController {
 
 
     // Endpoint to check if a review exists for a particular product ID by that customer
-    @GetMapping("/{customerId}/reviews/check")
-    public ResponseEntity<Boolean> checkReviewExists(@PathVariable Integer customerId, @RequestParam Integer productId) {
+    @GetMapping("api/customers/{customerId}/products/{productId}/reviews/check")
+    public ResponseEntity<Boolean> checkReviewExists(@PathVariable Integer customerId, @PathVariable Integer productId) {
         Optional<Customer> customerOptional = customerRepository.findById(customerId);
         Optional<Product> productOptional = productRepository.findById(productId);
 
@@ -304,6 +304,7 @@ public class CustomerController {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
     }
+
 
 
 
