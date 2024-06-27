@@ -97,7 +97,7 @@ public class ProductController {
         Optional<Product> productOptional = productRepository.findById(productId);
 
         if (productOptional.isPresent()) {
-            List<Review> reviews = reviewRepository.findByProduct(productOptional.get());
+            List<Review> reviews = reviewRepository.findByProductId(productId);
             return new ResponseEntity<>(reviews, HttpStatus.OK);
         } else {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
@@ -109,8 +109,8 @@ public class ProductController {
         Optional<Product> productOptional = productRepository.findById(productId);
 
         if (productOptional.isPresent()) {
-            Product product = productOptional.get();
-            review.setProduct(product);
+//            Product product = productOptional.get();
+            review.setProductId(productId);
 
             Review newReview = reviewRepository.save(review);
             return new ResponseEntity<>(newReview, HttpStatus.CREATED);
@@ -118,5 +118,8 @@ public class ProductController {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
     }
+
+
+
 
 }

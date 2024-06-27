@@ -237,7 +237,7 @@ public class CustomerController {
         Optional<Customer> customerOptional = customerRepository.findById(customerId);
 
         if (customerOptional.isPresent()) {
-            List<Review> reviews = reviewRepository.findByCustomer(customerOptional.get());
+            List<Review> reviews = reviewRepository.findByCustomerId(customerId);
             return new ResponseEntity<>(reviews, HttpStatus.OK);
         } else {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
@@ -251,8 +251,8 @@ public class CustomerController {
         Optional<Product> productOptional = productRepository.findById(productId);
 
         if (customerOptional.isPresent() && productOptional.isPresent()) {
-            review.setCustomer(customerOptional.get());
-            review.setProduct(productOptional.get());
+            review.setCustomerId(customerId);
+            review.setProductId(productId);
 
             Review savedReview = reviewRepository.save(review);
             return new ResponseEntity<>(savedReview, HttpStatus.CREATED);
@@ -260,6 +260,54 @@ public class CustomerController {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
     }
+
+
+    // Endpoint to check if a review exists for a particular product ID by that customer
+    @GetMapping("/{customerId}/reviews/check")
+    public ResponseEntity<Boolean> checkReviewExists(@PathVariable Integer customerId, @RequestParam Integer productId) {
+        Optional<Customer> customerOptional = customerRepository.findById(customerId);
+        Optional<Product> productOptional = productRepository.findById(productId);
+
+        if (customerOptional.isPresent() && productOptional.isPresent()) {
+            boolean exists = reviewRepository.existsByCustomerIdAndProductId(customerId, productId);
+            return new ResponseEntity<>(exists, HttpStatus.OK);
+        } else {
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
+    }
+
+
+    // Endpoint to patch review content and rating
+    @PatchMapping("/{customerId}/reviews/{reviewId}")
+    public ResponseEntity<Review> patchReview(@PathVariable Integer customerId, @PathVariable Integer reviewId, @RequestBody Review reviewUpdates) {
+        Optional<Customer> customerOptional = customerRepository.findById(customerId);
+        Optional<Review> reviewOptional = reviewRepository.findById(reviewId);
+
+        if (customerOptional.isPresent() && reviewOptional.isPresent()) {
+            Review existingReview = reviewOptional.get();
+
+            // Check if the review belongs to the customer
+            if (!existingReview.getCustomerId().equals(customerId)) {
+                return new ResponseEntity<>(HttpStatus.FORBIDDEN);
+            }
+
+            // Update the review content and rating
+            if (reviewUpdates.getRating() != null) {
+                existingReview.setRating(reviewUpdates.getRating());
+            }
+            if (reviewUpdates.getComment() != null) {
+                existingReview.setComment(reviewUpdates.getComment());
+            }
+
+            Review updatedReview = reviewRepository.save(existingReview);
+            return new ResponseEntity<>(updatedReview, HttpStatus.OK);
+        } else {
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
+    }
+
+
+
 
 }
 

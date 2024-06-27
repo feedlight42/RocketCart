@@ -147,7 +147,7 @@ public class LoginController {
                 .map(GrantedAuthority::getAuthority)
                 .toList();
 
-        return ResponseEntity.ok(new AuthResponse(jwt, roles));
+        return ResponseEntity.ok(new AuthResponse(jwt, roles, userDetails));
     }
 
     private void authenticate(String username, String password) {

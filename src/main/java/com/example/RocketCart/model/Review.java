@@ -11,13 +11,16 @@ public class Review {
     private Integer rating;
     private String comment;
 
-    @ManyToOne
-    @JoinColumn(name = "customer_id")
-    private Customer customer;
+//    @ManyToOne
+//    @JoinColumn(name = "customer_id")
+//    private Customer customer;
+//
+//    @ManyToOne
+//    @JoinColumn(name = "product_id")
+//    private Product product;
 
-    @ManyToOne
-    @JoinColumn(name = "product_id")
-    private Product product;
+    private Integer customerId;
+    private Integer productId;
 
     public Integer getReviewId() {
         return reviewId;
@@ -43,20 +46,36 @@ public class Review {
         this.comment = comment;
     }
 
-    public Customer getCustomer() {
-        return customer;
+//    public Customer getCustomer() {
+//        return customer;
+//    }
+//
+//    public void setCustomer(Customer customer) {
+//        this.customer = customer;
+//    }
+//
+//    public Product getProduct() {
+//        return product;
+//    }
+//
+//    public void setProduct(Product product) {
+//        this.product = product;
+//    }
+
+    public Integer getCustomerId() {
+        return customerId;
     }
 
-    public void setCustomer(Customer customer) {
-        this.customer = customer;
+    public void setCustomerId(Integer customerId) {
+        this.customerId = customerId;
     }
 
-    public Product getProduct() {
-        return product;
+    public Integer getProductId() {
+        return productId;
     }
 
-    public void setProduct(Product product) {
-        this.product = product;
+    public void setProductId(Integer productId) {
+        this.productId = productId;
     }
 
     // Getters and setters
