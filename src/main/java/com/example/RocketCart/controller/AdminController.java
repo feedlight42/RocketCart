@@ -7,9 +7,9 @@ import com.example.RocketCart.repository.SellerRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-
 import java.util.List;
 import java.util.Optional;
+
 
 @RestController
 @RequestMapping("/api/admin")
@@ -21,11 +21,7 @@ public class AdminController {
     @Autowired
     private CustomerRepository customerRepository;
 
-    // Get a list of all sellers
-    @GetMapping("/sellers")
-    public List<Seller> getAllSellers() {
-        return sellerRepository.findAll();
-    }
+
 
     // Get a list of all customers
     @GetMapping("/customers")
@@ -33,12 +29,49 @@ public class AdminController {
         return customerRepository.findAll();
     }
 
+    // Get customer details by customer ID
+    @GetMapping("/customers/{id}")
+    public ResponseEntity<Customer> getCustomerById(@PathVariable Integer id) {
+        Optional<Customer> customer = customerRepository.findById(id);
+        return customer.map(ResponseEntity::ok).orElseGet(() -> ResponseEntity.notFound().build());
+    }
+
+
+
+
+
+    // Get a list of all sellers
+    @GetMapping("/sellers")
+    public List<Seller> getAllSellers() {
+        return sellerRepository.findAll();
+    }
+
+
     // Get seller details by seller ID
     @GetMapping("/sellers/{id}")
     public ResponseEntity<Seller> getSellerById(@PathVariable Integer id) {
         Optional<Seller> seller = sellerRepository.findById(id);
         return seller.map(ResponseEntity::ok).orElseGet(() -> ResponseEntity.notFound().build());
     }
+
+
+
+    @DeleteMapping("/customers/{id}")
+    public ResponseEntity<Void> deleteCustomerById(@PathVariable Integer id) {
+        Optional<Customer> customer = customerRepository.findById(id);
+        if (customer.isPresent()) {
+            customerRepository.deleteById(id);
+            return ResponseEntity.noContent().build();
+        } else {
+            return ResponseEntity.notFound().build();
+        }
+    }
+
+
+
+
+
+
 
     // Update seller details
 //    @PutMapping("/sellers/{id}")
@@ -58,23 +91,8 @@ public class AdminController {
 
 
 
-    // Get customer details by customer ID
-    @GetMapping("/customers/{id}")
-    public ResponseEntity<Customer> getCustomerById(@PathVariable Integer id) {
-        Optional<Customer> customer = customerRepository.findById(id);
-        return customer.map(ResponseEntity::ok).orElseGet(() -> ResponseEntity.notFound().build());
-    }
 
-    @DeleteMapping("/customers/{id}")
-    public ResponseEntity<Void> deleteCustomerById(@PathVariable Integer id) {
-        Optional<Customer> customer = customerRepository.findById(id);
-        if (customer.isPresent()) {
-            customerRepository.deleteById(id);
-            return ResponseEntity.noContent().build();
-        } else {
-            return ResponseEntity.notFound().build();
-        }
-    }
+
 
 
 

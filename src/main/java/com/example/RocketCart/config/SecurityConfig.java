@@ -1,5 +1,6 @@
-package com.example.RocketCart.security;
+package com.example.RocketCart.config;
 
+import com.example.RocketCart.security.JwtRequestFilter;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;

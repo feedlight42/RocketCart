@@ -1,6 +1,6 @@
 package com.example.RocketCart.controller;
 
-import com.example.RocketCart.controller.exceptions.InsufficientStockException;
+import com.example.RocketCart.exceptions.InsufficientStockException;
 import com.example.RocketCart.model.*;
 import com.example.RocketCart.repository.*;
 import jakarta.transaction.Transactional;
@@ -8,13 +8,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.transaction.annotation.Isolation;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
-import java.math.BigDecimal;
-import java.text.DecimalFormat;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
@@ -30,19 +27,35 @@ public class CustomerController {
     private final PaymentRepository paymentRepository;
     private final ProductRepository productRepository;
     private final ReviewRepository reviewRepository;
+    private final SellerRepository sellerRepository;
 
     @Autowired
-    public CustomerController(CustomerRepository customerRepository, CartRepository cartRepository, OrderTableRepository orderRepository, OrderDetailRepository orderDetailRepository, PaymentRepository paymentRepository, ProductRepository productRepository, ReviewRepository reviewRepository) {
+    public CustomerController(CustomerRepository customerRepository, CartRepository cartRepository, OrderTableRepository orderTableRepository, OrderDetailRepository orderDetailRepository, PaymentRepository paymentRepository, ProductRepository productRepository, ReviewRepository reviewRepository, SellerRepository sellerRepository) {
         this.customerRepository = customerRepository;
         this.cartRepository = cartRepository;
-        this.orderTableRepository = orderRepository;
+        this.orderTableRepository = orderTableRepository;
         this.orderDetailRepository = orderDetailRepository;
         this.paymentRepository = paymentRepository;
         this.productRepository = productRepository;
-
         this.reviewRepository = reviewRepository;
+        this.sellerRepository = sellerRepository;
     }
 
+
+
+    @GetMapping("/api/c/{customerId}")
+    public ResponseEntity<Customer> getCustomerByIdpublic(@PathVariable Integer customerId) {
+        Optional<Customer> customerOptional = customerRepository.findById(customerId);
+        return customerOptional.map(customer -> new ResponseEntity<>(customer, HttpStatus.OK))
+                .orElseGet(() -> new ResponseEntity<>(HttpStatus.NOT_FOUND));
+    }
+
+
+    @GetMapping("/api/s/{id}")
+    public ResponseEntity<Seller> getSellerById(@PathVariable Integer id) {
+        Optional<Seller> seller = sellerRepository.findById(id);
+        return seller.map(ResponseEntity::ok).orElseGet(() -> ResponseEntity.notFound().build());
+    }
 
     @PostMapping("/{customerId}/uploadProfilePicture")
     public ResponseEntity<?> uploadProfilePicture(@PathVariable Integer customerId, @RequestParam("file") MultipartFile file) {
@@ -282,7 +295,8 @@ public class CustomerController {
         Optional<Customer> customerOptional = customerRepository.findById(customerId);
         Optional<Product> productOptional = productRepository.findById(productId);
 
-        if (customerOptional.isPresent() && productOptional.isPresent()) {
+        if (productOptional.isPresent()) {
+
             review.setCustomer(customerOptional.get());
             review.setProductId(productId);
 
@@ -306,7 +320,27 @@ public class CustomerController {
         } else {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
+    }// Helper method to check if the customer has purchased the product
+
+
+    @GetMapping("api/customers/{customerId}/products/{productId}/check")
+    public boolean hasCustomerPurchasedProduct(@PathVariable Integer customerId, @PathVariable Integer productId) {
+        // to do put it on single query by joining two tables
+        List<OrderTable> customerOrders = orderTableRepository.findAllByCustomerId(customerId);
+        for (OrderTable order : customerOrders) {
+            List<OrderDetail> orderDetails = orderDetailRepository.findByOrderId(order.getOrderId());
+            for (OrderDetail orderDetail : orderDetails) {
+                if (orderDetail.getProduct().getProductId().equals(productId)) {
+                    return true; // Customer has purchased the product
+                }
+            }
+        }
+        return false; // Customer has not purchased the product
     }
+
+
+
+
 
 
     // Endpoint to patch review content and rating

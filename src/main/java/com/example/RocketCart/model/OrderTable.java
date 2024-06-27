@@ -13,6 +13,9 @@ public class OrderTable {
     private Double totalAmount;
     private String status;
     private Integer customerId;
+    private String paymentStatus;
+
+
 
     public Integer getOrderId() {
         return orderId;
@@ -52,6 +55,14 @@ public class OrderTable {
 
     public void setCustomerId(Integer customerId) {
         this.customerId = customerId;
+    }
+
+    public String getPaymentStatus() {
+        return paymentStatus;
+    }
+
+    public void setPaymentStatus(String paymentStatus) {
+        this.paymentStatus = paymentStatus;
     }
 
     // Getters and setters

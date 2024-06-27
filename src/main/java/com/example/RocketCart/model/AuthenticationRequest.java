@@ -1,4 +1,4 @@
-package com.example.RocketCart.controller;
+package com.example.RocketCart.model;
 
 public class AuthenticationRequest {
 

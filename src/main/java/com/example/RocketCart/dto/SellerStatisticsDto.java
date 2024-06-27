@@ -1,4 +1,4 @@
-package com.example.RocketCart.model;
+package com.example.RocketCart.dto;
 
 import java.util.Map;
 

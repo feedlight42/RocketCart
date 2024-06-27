@@ -4,7 +4,6 @@ import com.example.RocketCart.model.Product;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
-
 import java.util.List;
 import java.util.Optional;
 
@@ -60,5 +59,7 @@ public interface OrderDetailRepository extends JpaRepository<OrderDetail, Intege
             nativeQuery = true)
     List<Object[]> getProductValuesLast6MonthsSeller(@Param("sellerId") Integer sellerId);
 
+
+    List<OrderDetail> findByOrderId(Integer orderId);
 
 }

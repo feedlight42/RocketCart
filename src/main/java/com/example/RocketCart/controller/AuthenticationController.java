@@ -1,5 +1,6 @@
 package com.example.RocketCart.controller;
 
+import com.example.RocketCart.model.AuthenticationRequest;
 import com.example.RocketCart.security.JwtUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -35,4 +36,5 @@ public class AuthenticationController {
 
         return jwt;
     }
+
 }

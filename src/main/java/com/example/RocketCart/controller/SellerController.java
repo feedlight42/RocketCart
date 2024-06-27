@@ -1,5 +1,6 @@
 package com.example.RocketCart.controller;
 
+import com.example.RocketCart.dto.SellerStatisticsDto;
 import com.example.RocketCart.model.*;
 import com.example.RocketCart.repository.OrderDetailRepository;
 import com.example.RocketCart.repository.OrderTableRepository;
@@ -13,18 +14,13 @@ import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import java.text.SimpleDateFormat;
 import java.time.LocalDate;
 import java.time.ZoneId;
 import java.util.*;
 import java.util.stream.Collectors;
-import java.math.BigDecimal;
-import java.text.SimpleDateFormat;
-import java.util.Calendar;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/api/sellers")
