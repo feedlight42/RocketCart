@@ -94,8 +94,8 @@ public class SellerController {
 //    ERROR
 
 
-
-    @GetMapping("/{sellerId}/products/{productId}/sold")
+//    returns number of products sod along with stock
+    @GetMapping("/{sellerId}/products/{productId}/sold-statistics")
     public ResponseEntity<?> getproductssold(@PathVariable int sellerId, @PathVariable int productId) {
 
         Product existingProduct = productRepository.findByProductIdAndSellerIdAndDeletedFalse(productId, sellerId);
@@ -113,8 +113,13 @@ public class SellerController {
 
         double totalProductRevenue = totalQuantitySold * existingProduct.getPrice();
 
-        // Return the total quantity sold as the response
-        return ResponseEntity.ok(totalQuantitySold);
+        Integer stock = existingProduct.getStock();
+
+        List<Object> statisticsList = new ArrayList<>();
+        statisticsList.add(totalQuantitySold);
+        statisticsList.add(stock);
+
+        return ResponseEntity.ok(statisticsList);
 
     }
 
