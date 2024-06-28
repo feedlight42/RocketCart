@@ -8,10 +8,7 @@ import com.example.RocketCart.security.JwtUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -106,6 +103,7 @@ public class LoginController {
 
         // Hash the password before saving
         user.setPassword(passwordEncoder.encode(user.getPassword()));
+        user.setVerified(false);
         // Set the default role to USER
 
         // Save the user to the database
@@ -147,6 +145,12 @@ public class LoginController {
 //
 //    }
 
+
+
+    @PostMapping("/login/check-verified/{sellerId}")
+    public boolean checkverifiedseller(@PathVariable Integer sellerId){
+        return sellerRepository.findVerifiedStatusBySellerId(sellerId);
+    }
 
     @PostMapping("/login")
     public ResponseEntity<?> createAuthenticationToken(@RequestBody AuthRequest authRequest) throws Exception {

@@ -22,4 +22,5 @@ public interface OrderTableRepository extends JpaRepository<OrderTable, Integer>
     List<OrderTable> findAllByCustomerId(int customerId);
 
     Optional<OrderTable> findByCustomerIdAndStatus(int customerId, String pending);
+
 }

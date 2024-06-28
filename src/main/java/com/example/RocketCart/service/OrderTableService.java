@@ -148,6 +148,7 @@ public class OrderTableService {
         newPayment.setPaymentMethod(paymentRequest.getPaymentMethod());
         newPayment.setAmount(pendingOrder.getTotalAmount());
 
+        pendingOrder.setStatus("done");
 //        paymentRepository.save(newPayment);
 
         for (Cart cartItem : cartItems) {

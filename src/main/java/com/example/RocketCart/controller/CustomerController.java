@@ -30,11 +30,12 @@ public class CustomerController {
     private final ProductRepository productRepository;
     private final ReviewRepository reviewRepository;
     private final CustomerRepository customerRepository;
+    private final OrderTableRepository orderTableRepository;
 
     @Autowired
     public CustomerController(CustomerService customerService, CartService cartService,
                               OrderTableService orderService, ProductService productService, CartRepository cartRepository,
-                              ReviewService reviewService, SellerService sellerService, OrderDetailService orderDetailService, ProductRepository productRepository, ReviewRepository reviewRepository, CustomerRepository customerRepository) {
+                              ReviewService reviewService, SellerService sellerService, OrderDetailService orderDetailService, ProductRepository productRepository, ReviewRepository reviewRepository, CustomerRepository customerRepository, OrderTableRepository orderTableRepository) {
         this.customerService = customerService;
         this.cartService = cartService;
         this.orderService = orderService;
@@ -45,6 +46,7 @@ public class CustomerController {
         this.productRepository = productRepository;
         this.reviewRepository = reviewRepository;
         this.customerRepository = customerRepository;
+        this.orderTableRepository = orderTableRepository;
     }
 
     @GetMapping("/api/c/{customerId}")
@@ -215,6 +217,16 @@ public class CustomerController {
         return ResponseEntity.status(HttpStatus.OK).body(null);
     }
 
+
+    @GetMapping("/api/customers/{customerId}/pending-orders")
+    public boolean pendingOrder(@PathVariable int customerId){
+        try{
+            OrderTable pendingOrder = orderTableRepository.findByCustomerIdAndStatus(customerId, "Pending").orElse(null);
+            return true;
+        } catch (Exception e){
+            return false;
+        }
+    }
 
 
 
