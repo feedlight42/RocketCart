@@ -140,6 +140,20 @@ public class SellerController {
     }
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
     @GetMapping("/{sellerId}/statistics")
     public ResponseEntity<SellerStatisticsDto> getSellerStatistics(@PathVariable Integer sellerId) {
         // Retrieve all products for the seller

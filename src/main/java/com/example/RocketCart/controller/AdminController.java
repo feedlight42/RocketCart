@@ -59,6 +59,17 @@ public class AdminController {
         return sellerRepository.findAll();
     }
 
+    @GetMapping("/sellers/verified")
+    public List<Seller> getVerifiedSellers() {
+        return sellerRepository.findAllByVerifiedTrue();
+    }
+
+
+    // Get a list of all sellers
+    @GetMapping("/sellers/not-verified")
+    public List<Seller> getAllNotVerifiedSellers() {
+        return sellerRepository.findAllByVerifiedFalse();
+    }
 
     // Get seller details by seller ID
     @GetMapping("/sellers/{id}")
@@ -66,6 +77,7 @@ public class AdminController {
         Optional<Seller> seller = sellerRepository.findById(id);
         return seller.map(ResponseEntity::ok).orElseGet(() -> ResponseEntity.notFound().build());
     }
+
 
 
 

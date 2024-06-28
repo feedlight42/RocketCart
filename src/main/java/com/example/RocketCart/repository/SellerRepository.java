@@ -11,4 +11,8 @@ public interface SellerRepository extends JpaRepository<Seller, Integer> {
     List<Seller> findAllByDeletedFalse();
 
     Optional<Seller> findBySellerIdAndDeletedFalse(Integer sellerId);
+
+    List<Seller> findAllByVerifiedTrue();
+
+    List<Seller> findAllByVerifiedFalse();
 }

@@ -93,11 +93,19 @@ public class OrderTableService {
 
 
     public OrderTable placeOrder(int customerId) throws InsufficientStockException {
-        List<Cart> cartItems = cartRepository.findAllByCustomerId(customerId);
+
+        List<Cart> cartItems = cartRepository.findAllByCustomerIdAndDeletedFalse(customerId);
+        System.out.println("inside place order method");
+
         double totalAmount = 0;
 
         for (Cart cartItem : cartItems) {
+            System.out.println(cartItem.getCartItemId());
+            System.out.println(cartItem.getQuantity());
+
+            System.out.println("inside iter method");
             Product product = productRepository.findById(cartItem.getProduct().getProductId()).orElse(null);
+            System.out.println(product.getStock());
 
             if (product != null) {
                 totalAmount += (product.getPrice() * cartItem.getQuantity());
@@ -125,7 +133,7 @@ public class OrderTableService {
 
 
     public void makePayment(int customerId, Payment paymentRequest) {
-        List<Cart> cartItems = cartRepository.findAllByCustomerId(customerId);
+        List<Cart> cartItems = cartRepository.findAllByCustomerIdAndDeletedFalse(customerId);
 
         // Retrieve the order that is pending for this customer
         OrderTable pendingOrder = orderTableRepository.findByCustomerIdAndPaymentStatus(customerId, "Pending").orElse(null);

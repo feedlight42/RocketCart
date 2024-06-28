@@ -8,7 +8,8 @@ import java.util.List;
 import java.util.Optional;
 
 public interface CartRepository extends JpaRepository<Cart, Integer> {
-    List<Cart> findAllByCustomerId(int customerId);
+
+    List<Cart> findAllByCustomerIdAndDeletedFalse(int customerId);
 
     void deleteAllByCustomerId(int customerId);
 
