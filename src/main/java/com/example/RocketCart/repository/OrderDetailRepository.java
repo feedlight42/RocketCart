@@ -1,4 +1,5 @@
 package com.example.RocketCart.repository;
+import com.example.RocketCart.model.Customer;
 import com.example.RocketCart.model.OrderDetail;
 import com.example.RocketCart.model.Product;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -9,6 +10,18 @@ import java.util.Optional;
 
 public interface OrderDetailRepository extends JpaRepository<OrderDetail, Integer> {
 //    Optional<OrderDetail> getOrderDetailById(Integer id);
+
+    @Query(value =
+            "SELECT CASE WHEN COUNT(*) > 0 THEN true ELSE false END " +
+                    "FROM order_detail od " +
+                    "JOIN order_table ot ON od.order_id = ot.order_id " +
+                    "WHERE ot.customer_id = :customerId " +
+                    "AND od.product_id = :productId",
+            nativeQuery = true)
+    boolean existsByCustomerIdAndProductId(@Param("customerId") Integer customerId, @Param("productId") Integer productId);
+
+
+
 
     List<OrderDetail> getOrderDetailsByOrderId(Integer orderId);
 

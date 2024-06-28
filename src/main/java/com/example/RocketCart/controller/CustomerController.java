@@ -2,8 +2,7 @@ package com.example.RocketCart.controller;
 
 import com.example.RocketCart.exceptions.InsufficientStockException;
 import com.example.RocketCart.model.*;
-import com.example.RocketCart.repository.CartRepository;
-import com.example.RocketCart.repository.OrderDetailRepository;
+import com.example.RocketCart.repository.*;
 import com.example.RocketCart.service.*;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -28,11 +27,14 @@ public class CustomerController {
     private final ReviewService reviewService;
     private final SellerService sellerService;
     private final OrderDetailService orderDetailService;
+    private final ProductRepository productRepository;
+    private final ReviewRepository reviewRepository;
+    private final CustomerRepository customerRepository;
 
     @Autowired
     public CustomerController(CustomerService customerService, CartService cartService,
                               OrderTableService orderService, ProductService productService, CartRepository cartRepository,
-                              ReviewService reviewService, SellerService sellerService, OrderDetailService orderDetailService) {
+                              ReviewService reviewService, SellerService sellerService, OrderDetailService orderDetailService, ProductRepository productRepository, ReviewRepository reviewRepository, CustomerRepository customerRepository) {
         this.customerService = customerService;
         this.cartService = cartService;
         this.orderService = orderService;
@@ -40,6 +42,9 @@ public class CustomerController {
         this.reviewService = reviewService;
         this.sellerService = sellerService;
         this.orderDetailService = orderDetailService;
+        this.productRepository = productRepository;
+        this.reviewRepository = reviewRepository;
+        this.customerRepository = customerRepository;
     }
 
     @GetMapping("/api/c/{customerId}")
@@ -204,6 +209,16 @@ public class CustomerController {
         }
     }
 
+    @PostMapping("/api/customers/{customerId}/make-payment")
+    public ResponseEntity<?> makePayment(@PathVariable int customerId, @RequestBody Payment paymentRequest){
+        orderService.makePayment(customerId, paymentRequest);
+        return ResponseEntity.status(HttpStatus.OK).body(null);
+    }
+
+
+
+
+
 
 
 
@@ -233,21 +248,52 @@ public class CustomerController {
         return new ResponseEntity<>(savedReview, HttpStatus.CREATED);
     }
 
+
+//    check if the customer placed a review before
     @GetMapping("/api/customers/{customerId}/products/{productId}/reviews/check")
     public ResponseEntity<Boolean> checkReviewExists(@PathVariable Integer customerId, @PathVariable Integer productId) {
         boolean reviewExists = reviewService.checkReviewExists(customerId, productId);
         return ResponseEntity.ok(reviewExists);
     }
 
-
-
-
-
-//    @GetMapping("/api/customers/{customerId}/products/{productId}/check")
-//    public ResponseEntity<Boolean> hasCustomerPurchasedProduct(@PathVariable Integer customerId, @PathVariable Integer productId) {
-//        boolean hasPurchased = orderDetailService.hasCustomerPurchasedProduct(customerId, productId);
-//        return ResponseEntity.ok(hasPurchased);
+//    @PostMapping("/api/customers/{customerId}/products/{productId}/reviews")
+//    public ResponseEntity<Review> createReviewForProduct(@PathVariable Integer customerId, @PathVariable Integer productId, @RequestBody Review review) {
+//        Optional<Product> productOptional = productRepository.findById(productId);
+//        Optional<Customer> customerOptional = customerRepository.findById(customerId);
+//
+//        if (productOptional.isPresent()) {
+////            Product product = productOptional.get();
+//            review.setProductId(productId);
+//            review.setCustomer(customerOptional.get());
+//
+//            Review newReview = reviewRepository.save(review);
+//            return new ResponseEntity<>(newReview, HttpStatus.CREATED);
+//        } else {
+//            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+//        }
 //    }
+
+
+
+
+
+    @GetMapping("/api/customers/{customerId}/products/{productId}/check-purchased")
+    public ResponseEntity<Boolean> hasCustomerPurchasedProduct(@PathVariable Integer customerId, @PathVariable Integer productId) {
+        boolean hasPurchased = orderDetailService.hasCustomerPurchasedProduct(customerId, productId);
+        return ResponseEntity.ok(hasPurchased);
+    }
+
+
+
+
+
+
+
+
+
+
+
+
 
 //    @PatchMapping("/{customerId}/reviews/{reviewId}")
 //    public ResponseEntity<Review> patchReview(@PathVariable Integer customerId, @PathVariable Integer reviewId, @RequestBody Review reviewUpdates) {

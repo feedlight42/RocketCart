@@ -1,7 +1,9 @@
 package com.example.RocketCart.controller;
 
+import com.example.RocketCart.model.Admin;
 import com.example.RocketCart.model.Customer;
 import com.example.RocketCart.model.Seller;
+import com.example.RocketCart.repository.AdminRepository;
 import com.example.RocketCart.repository.CustomerRepository;
 import com.example.RocketCart.repository.SellerRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -20,6 +22,17 @@ public class AdminController {
 
     @Autowired
     private CustomerRepository customerRepository;
+
+    @Autowired
+    private AdminRepository adminRepository;
+
+
+    @GetMapping("/{id}")
+    public ResponseEntity<Admin> getAdminById(@PathVariable Integer id) {
+        Optional<Admin> customer = adminRepository.findById(id);
+        return customer.map(ResponseEntity::ok).orElseGet(() -> ResponseEntity.notFound().build());
+    }
+
 
 
 

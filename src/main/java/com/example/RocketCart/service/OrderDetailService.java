@@ -1,7 +1,11 @@
 package com.example.RocketCart.service;
 
+import com.example.RocketCart.model.Customer;
 import com.example.RocketCart.model.OrderDetail;
+import com.example.RocketCart.model.OrderTable;
+import com.example.RocketCart.repository.CustomerRepository;
 import com.example.RocketCart.repository.OrderDetailRepository;
+import com.example.RocketCart.repository.OrderTableRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
@@ -15,10 +19,14 @@ import java.util.Optional;
 public class OrderDetailService {
 
     private final OrderDetailRepository orderDetailRepository;
+    private final CustomerRepository customerRepository;
+    private final OrderTableRepository orderTableRepository;
 
     @Autowired
-    public OrderDetailService(OrderDetailRepository orderDetailRepository) {
+    public OrderDetailService(OrderDetailRepository orderDetailRepository, CustomerRepository customerRepository, OrderTableRepository orderTableRepository) {
         this.orderDetailRepository = orderDetailRepository;
+        this.customerRepository = customerRepository;
+        this.orderTableRepository = orderTableRepository;
     }
 
     public List<OrderDetail> findAll() {
@@ -52,6 +60,14 @@ public class OrderDetailService {
         }
     }
 
+
+    public boolean hasCustomerPurchasedProduct(Integer customerId, Integer productId) {
+        Customer customer = customerRepository.findById(customerId).orElse(null);
+        if (customer == null) {
+            return false;
+        }
+        return orderDetailRepository.existsByCustomerIdAndProductId(customerId, productId);
+    }
 //    public boolean hasCustomerPurchasedProduct(Integer customerId, Integer productId) {
 //        return orderDetailRepository.existsByCustomerIdAndProductId(customerId, productId);
 //    }

@@ -6,6 +6,7 @@ import com.example.RocketCart.repository.OrderDetailRepository;
 import com.example.RocketCart.repository.OrderTableRepository;
 import com.example.RocketCart.repository.ProductRepository;
 import com.example.RocketCart.repository.SellerRepository;
+import com.example.RocketCart.service.SellerStatisticsService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -37,6 +38,9 @@ public class SellerController {
 
     @Autowired
     private OrderTableRepository orderTableRepository;
+
+    @Autowired
+    private SellerStatisticsService sellerStatisticsService;
 
     @GetMapping("/{sellerId}")
     public ResponseEntity<Seller> getSellerDetails(@PathVariable int sellerId) {
@@ -121,6 +125,14 @@ public class SellerController {
     }
 
 
+
+
+//    !!!!!!!!!
+    @GetMapping("/{sellerId}/stat")
+    public ResponseEntity<Map<String, Object>> getSellerStat(@PathVariable Integer sellerId) {
+        Map<String, Object> statistics = sellerStatisticsService.getSellerStatistics(sellerId);
+        return ResponseEntity.ok(statistics);
+    }
 
 
     @GetMapping("/{sellerId}/statistics")
