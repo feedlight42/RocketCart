@@ -15,6 +15,10 @@ public class Payment {
 
     private Integer orderTableId;
 
+    @Column(name = "deleted", nullable = false)
+    private boolean deleted = false;
+
+
     public Integer getPaymentId() {
         return paymentId;
     }
@@ -53,6 +57,14 @@ public class Payment {
 
     public void setOrderTableId(Integer orderTableId) {
         this.orderTableId = orderTableId;
+    }
+
+    public boolean isDeleted() {
+        return deleted;
+    }
+
+    public void setDeleted(boolean deleted) {
+        this.deleted = deleted;
     }
 
     // Getters and setters

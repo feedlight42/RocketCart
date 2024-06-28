@@ -14,6 +14,10 @@ public class Seller {
     private String phoneNumber;
     private Boolean verified;
 
+    @Column(name = "deleted", nullable = false)
+    private boolean deleted = false;
+
+
     public Integer getSellerId() {
         return sellerId;
     }
@@ -60,6 +64,14 @@ public class Seller {
 
     public void setVerified(Boolean verified) {
         this.verified = verified;
+    }
+
+    public boolean isDeleted() {
+        return deleted;
+    }
+
+    public void setDeleted(boolean deleted) {
+        this.deleted = deleted;
     }
 
     // Getters and setters

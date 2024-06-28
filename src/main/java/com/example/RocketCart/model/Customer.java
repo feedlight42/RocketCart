@@ -20,10 +20,15 @@ public class Customer {
     @Lob
     private byte[] imageData;
 
+    @Column(name = "deleted", nullable = false)
+    private boolean deleted = false;
+
+
     // In Customer entity
     @OneToMany(mappedBy = "customerId")
     @OrderBy("cartItemId ASC")
     private List<Cart> cartItems;
+
 
 
     public Integer getCustomerId() {
@@ -97,6 +102,15 @@ public class Customer {
     public void setImageData(byte[] imageData) {
         this.imageData = imageData;
     }
+
+    public boolean isDeleted() {
+        return deleted;
+    }
+
+    public void setDeleted(boolean deleted) {
+        this.deleted = deleted;
+    }
+
 
     // Getters and setters
 }

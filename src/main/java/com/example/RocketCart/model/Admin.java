@@ -12,6 +12,10 @@ public class Admin {
     private String email;
     private String password;
 
+    @Column(name = "deleted", nullable = false)
+    private boolean deleted = false;
+
+
     public Integer getAdminId() {
         return adminId;
     }
@@ -42,6 +46,14 @@ public class Admin {
 
     public void setPassword(String password) {
         this.password = password;
+    }
+
+    public boolean isDeleted() {
+        return deleted;
+    }
+
+    public void setDeleted(boolean deleted) {
+        this.deleted = deleted;
     }
 
     // Getters and setters

@@ -13,7 +13,11 @@ public class OrderTable {
     private Double totalAmount;
     private String status;
     private Integer customerId;
-    private String paymentStatus;
+    private String paymentStatus = "pending";
+
+    @Column(name = "deleted", nullable = false)
+    private boolean deleted = false;
+
 
 
 
@@ -63,6 +67,14 @@ public class OrderTable {
 
     public void setPaymentStatus(String paymentStatus) {
         this.paymentStatus = paymentStatus;
+    }
+
+    public boolean isDeleted() {
+        return deleted;
+    }
+
+    public void setDeleted(boolean deleted) {
+        this.deleted = deleted;
     }
 
     // Getters and setters

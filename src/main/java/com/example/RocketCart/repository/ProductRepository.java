@@ -67,5 +67,10 @@ public interface ProductRepository extends JpaRepository<Product, Integer> {
     List<Product> findProductBySellerId(Integer sellerId);
 
 
+    Page<Product> findAllByDeletedFalse(Pageable pageable);
+
+    Page<Product> findByPriceBetweenAndCategoryNameContainingIgnoreCaseAndDeletedFalse(Double minPrice, Double maxPrice, String categoryName, Pageable pageable);
+
+    Page<Product> findByCategoryNameContainingIgnoreCaseAndDeletedFalse(String categoryName, Pageable pageable);
 }
 

@@ -2,7 +2,9 @@ package com.example.RocketCart.controller;
 
 import com.example.RocketCart.exceptions.InsufficientStockException;
 import com.example.RocketCart.model.*;
-import com.example.RocketCart.repository.*;
+import com.example.RocketCart.repository.CartRepository;
+import com.example.RocketCart.repository.OrderDetailRepository;
+import com.example.RocketCart.service.*;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -12,7 +14,6 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
-import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -20,55 +21,48 @@ import java.util.Optional;
 @RestController
 public class CustomerController {
 
-    private final CustomerRepository customerRepository;
+    private final CustomerService customerService;
     private final CartRepository cartRepository;
-    private final OrderTableRepository orderTableRepository;
-    private final OrderDetailRepository orderDetailRepository;
-    private final PaymentRepository paymentRepository;
-    private final ProductRepository productRepository;
-    private final ReviewRepository reviewRepository;
-    private final SellerRepository sellerRepository;
+    private final CartService cartService;
+    private final OrderTableService orderService;
+    private final ReviewService reviewService;
+    private final SellerService sellerService;
+    private final OrderDetailService orderDetailService;
 
     @Autowired
-    public CustomerController(CustomerRepository customerRepository, CartRepository cartRepository, OrderTableRepository orderTableRepository, OrderDetailRepository orderDetailRepository, PaymentRepository paymentRepository, ProductRepository productRepository, ReviewRepository reviewRepository, SellerRepository sellerRepository) {
-        this.customerRepository = customerRepository;
+    public CustomerController(CustomerService customerService, CartService cartService,
+                              OrderTableService orderService, ProductService productService, CartRepository cartRepository,
+                              ReviewService reviewService, SellerService sellerService, OrderDetailService orderDetailService) {
+        this.customerService = customerService;
+        this.cartService = cartService;
+        this.orderService = orderService;
         this.cartRepository = cartRepository;
-        this.orderTableRepository = orderTableRepository;
-        this.orderDetailRepository = orderDetailRepository;
-        this.paymentRepository = paymentRepository;
-        this.productRepository = productRepository;
-        this.reviewRepository = reviewRepository;
-        this.sellerRepository = sellerRepository;
+        this.reviewService = reviewService;
+        this.sellerService = sellerService;
+        this.orderDetailService = orderDetailService;
     }
-
-
 
     @GetMapping("/api/c/{customerId}")
-    public ResponseEntity<Customer> getCustomerByIdpublic(@PathVariable Integer customerId) {
-        Optional<Customer> customerOptional = customerRepository.findById(customerId);
-        return customerOptional.map(customer -> new ResponseEntity<>(customer, HttpStatus.OK))
-                .orElseGet(() -> new ResponseEntity<>(HttpStatus.NOT_FOUND));
+    public ResponseEntity<Customer> getCustomerById(@PathVariable Integer customerId) {
+        Optional<Customer> customerOptional = customerService.getCustomerById(customerId);
+        return customerOptional.map(ResponseEntity::ok).orElseGet(() -> ResponseEntity.notFound().build());
     }
-
 
     @GetMapping("/api/s/{id}")
     public ResponseEntity<Seller> getSellerById(@PathVariable Integer id) {
-        Optional<Seller> seller = sellerRepository.findById(id);
+        Optional<Seller> seller = sellerService.getSellerById(id);
         return seller.map(ResponseEntity::ok).orElseGet(() -> ResponseEntity.notFound().build());
     }
 
     @PostMapping("/{customerId}/uploadProfilePicture")
     public ResponseEntity<?> uploadProfilePicture(@PathVariable Integer customerId, @RequestParam("file") MultipartFile file) {
         try {
-            Customer customer = customerRepository.findByCustomerId(customerId);
-            if (customer == null) {
+            boolean success = customerService.uploadProfilePicture(customerId, file);
+            if (success) {
+                return ResponseEntity.ok().body("Profile picture uploaded successfully for customer ID: " + customerId);
+            } else {
                 return ResponseEntity.notFound().build();
             }
-
-            customer.setImageData(file.getBytes());
-            customerRepository.save(customer);
-
-            return ResponseEntity.ok().body("Profile picture uploaded successfully for customer ID: " + customerId);
         } catch (IOException e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Failed to upload profile picture");
         }
@@ -76,97 +70,74 @@ public class CustomerController {
 
     @GetMapping("/{customerId}/profilePicture")
     public ResponseEntity<byte[]> getProfilePicture(@PathVariable Integer customerId) {
-        Customer customer = customerRepository.findByCustomerId(customerId);
-        if (customer != null && customer.getImageData() != null) {
-            return ResponseEntity.ok()
-                    .contentType(MediaType.IMAGE_JPEG) // Adjust content type based on your image format
-                    .body(customer.getImageData());
+        Optional<Customer> customerOptional = customerService.getCustomerById(customerId);
+        if (customerOptional.isPresent()) {
+            byte[] imageData = customerService.getProfilePicture(customerId);
+            if (imageData != null) {
+                return ResponseEntity.ok()
+                        .contentType(MediaType.IMAGE_JPEG)
+                        .body(imageData);
+            } else {
+                return ResponseEntity.notFound().build();
+            }
         } else {
             return ResponseEntity.notFound().build();
         }
     }
 
-
     @PostMapping("/api/customers")
     public ResponseEntity<Customer> createCustomer(@RequestBody Customer customer) {
-        Customer newCustomer = customerRepository.save(customer);
+        Customer newCustomer = customerService.createCustomer(customer);
         return new ResponseEntity<>(newCustomer, HttpStatus.CREATED);
     }
 
     @GetMapping("/api/login/{customerId}")
-    public ResponseEntity<Customer> getCustomerById(@PathVariable Integer customerId) {
-        Optional<Customer> customerOptional = customerRepository.findById(customerId);
-        return customerOptional.map(customer -> new ResponseEntity<>(customer, HttpStatus.OK))
-                .orElseGet(() -> new ResponseEntity<>(HttpStatus.NOT_FOUND));
+    public ResponseEntity<Customer> loginCustomer(@PathVariable Integer customerId) {
+        Optional<Customer> customerOptional = customerService.getCustomerById(customerId);
+        return customerOptional.map(ResponseEntity::ok).orElseGet(() -> ResponseEntity.notFound().build());
     }
 
     @PutMapping("/api/customers/{customerId}")
     public ResponseEntity<Customer> updateCustomer(@PathVariable Integer customerId, @RequestBody Customer updatedCustomer) {
-        Optional<Customer> existingCustomerOptional = customerRepository.findById(customerId);
+        Optional<Customer> existingCustomerOptional = customerService.getCustomerById(customerId);
         if (existingCustomerOptional.isPresent()) {
-            Customer existingCustomer = existingCustomerOptional.get();
-            existingCustomer.setUsername(updatedCustomer.getUsername());
-            existingCustomer.setEmail(updatedCustomer.getEmail());
-            existingCustomer.setPassword(updatedCustomer.getPassword());
-            existingCustomer.setAddress(updatedCustomer.getAddress());
-            existingCustomer.setPhoneNumber(updatedCustomer.getPhoneNumber());
-            existingCustomer.setBillingAddress(updatedCustomer.getBillingAddress());
-
-            Customer updatedCustomerEntity = customerRepository.save(existingCustomer);
-            return new ResponseEntity<>(updatedCustomerEntity, HttpStatus.OK);
+            Customer updatedCustomerEntity = customerService.updateCustomer(customerId, updatedCustomer);
+            return ResponseEntity.ok(updatedCustomerEntity);
         } else {
-            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+            return ResponseEntity.notFound().build();
         }
     }
 
-
-
     @GetMapping("/api/customers/{customerId}/cart")
     public ResponseEntity<List<Cart>> getCustomerCart(@PathVariable Integer customerId) {
-        Customer customer = customerRepository.findById(customerId).orElse(null);
-        if (customer != null) {
-            List<Cart> cartItems = customer.getCartItems();
-            return new ResponseEntity<>(cartItems, HttpStatus.OK);
-        } else {
-            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-        }
+        List<Cart> cartItems = cartService.getCustomerCart(customerId);
+        return ResponseEntity.ok(cartItems);
     }
 
     @PostMapping("/api/customers/{customerId}/cart")
     public ResponseEntity<Cart> addItemToCart(@PathVariable Integer customerId, @RequestBody Cart cartItem) {
-        Customer customer = customerRepository.findById(customerId).orElse(null);
-        if (customer != null) {
-            cartItem.setCustomerId(customer.getCustomerId());
-            Cart newCartItem = cartRepository.save(cartItem);
-            return new ResponseEntity<>(newCartItem, HttpStatus.CREATED);
-        } else {
-            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-        }
+        Cart newCartItem = cartService.addItemToCart(customerId, cartItem);
+        return new ResponseEntity<>(newCartItem, HttpStatus.CREATED);
     }
 
     @DeleteMapping("/api/customers/{customerId}/cart/{cartItemId}")
     public ResponseEntity<String> deleteCartItem(@PathVariable Integer cartItemId) {
-        // Check if the cart item exists
-        if (cartRepository.existsById(cartItemId)) {
-            cartRepository.deleteById(cartItemId);
-            return new ResponseEntity<>("Cart item deleted successfully", HttpStatus.OK);
+        boolean deleted = cartService.softDeleteCartItem(cartItemId);
+        if (deleted) {
+            return ResponseEntity.ok("Cart item deleted successfully");
         } else {
-            return new ResponseEntity<>("Cart item not found", HttpStatus.NOT_FOUND);
+            return ResponseEntity.notFound().build();
         }
     }
 
-
     @PutMapping("/api/customers/{customerId}/cart/{cartId}")
-    public ResponseEntity<Cart> updateCartItem(@PathVariable Long customerId, @PathVariable Integer cartId, @RequestBody Cart updatedCart) {
-        // Check if the cart item exists
-        if (cartRepository.existsById(cartId)) {
-            Cart existingCart = cartRepository.findById(cartId).orElse(null);
-                updatedCart.setCartItemId(cartId);
-                Cart updatedCartItem = cartRepository.save(updatedCart);
-                return new ResponseEntity<>(updatedCartItem, HttpStatus.OK);
-
+    public ResponseEntity<Cart> updateCartItem(@PathVariable Integer customerId, @PathVariable Integer cartId, @RequestBody Cart updatedCart) {
+        Cart updatedCartItem = cartService.updateCartItem(customerId, cartId, updatedCart);
+        if (updatedCartItem != null) {
+            return ResponseEntity.ok(updatedCartItem);
+        } else {
+            return ResponseEntity.notFound().build();
         }
-        return new ResponseEntity<>(HttpStatus.NOT_FOUND);
     }
 
     @PatchMapping("/api/customers/{customerId}/cart/{cartId}")
@@ -194,14 +165,13 @@ public class CustomerController {
     }
 
     @GetMapping("/api/customers/{customerId}/orderhistory")
-    public List<OrderTable> getOrderHistory(@PathVariable int customerId) {
-        return orderTableRepository.findAllByCustomerIdOrderByOrderDateDesc(customerId);
+    public List<OrderTable> getOrderHistory(@PathVariable Integer customerId) {
+        return orderService.getOrderHistory(customerId);
     }
 
     @GetMapping("/api/customers/{customerId}/orderhistory/{orderId}")
     public ResponseEntity<List<OrderDetail>> getOrderDetailsByOrderId(@PathVariable Integer orderId) {
-        List<OrderDetail> orderDetails = orderDetailRepository.getOrderDetailsByOrderId(orderId);
-
+        List<OrderDetail> orderDetails = orderDetailService.getOrderDetailsByOrderId(orderId);
         if (!orderDetails.isEmpty()) {
             return ResponseEntity.ok(orderDetails);
         } else {
@@ -209,64 +179,29 @@ public class CustomerController {
         }
     }
 
+//    @Transactional
+//    @PostMapping("/api/customers/{customerId}/payment")
+//    public ResponseEntity<String> placeOrderAndMakePayment(@PathVariable Integer customerId, @RequestBody Payment paymentRequest) throws InsufficientStockException {
+//        try {
+//            orderService.placeOrderAndMakePayment(customerId, paymentRequest);
+//            return ResponseEntity.ok("Order placed and payment made successfully");
+//        } catch (InsufficientStockException e) {
+//            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
+//        }
+//    }
 
-    @Transactional
-    @PostMapping("/api/customers/{customerId}/payment")
-    public void placeOrderAndMakePayment(@PathVariable int customerId, @RequestBody Payment paymentRequest) throws InsufficientStockException {
-        // Logic to create new order
-        List<Cart> cartItems = cartRepository.findAllByCustomerId(customerId);
-        double totalAmount = 0;
 
-        for (Cart cartItem : cartItems) {
-            Product product = productRepository.findById(cartItem.getProduct().getProductId()).orElse(null);
 
-            if (product != null) {
-                totalAmount += (product.getPrice() * cartItem.getQuantity());
-                int orderedQuantity = cartItem.getQuantity();
 
-                // Update product stock
-                if (product.getStock() >= orderedQuantity) {
-                    product.setStock(product.getStock() - orderedQuantity);
-                } else {
-                    // Handle insufficient stock scenario
-                    // You can throw an exception or handle it based on your requirements
-                    // For example:
-                    throw new InsufficientStockException("Insufficient stock for product: " + product.getProductName());
-                }
-                productRepository.save(product);
-            }
+
+    @PostMapping("/api/customers/{customerId}/make-order")
+    public ResponseEntity<OrderTable> placeOrder(@PathVariable int customerId) {
+        try {
+            OrderTable order = orderService.placeOrder(customerId);
+            return ResponseEntity.ok(order);
+        } catch (InsufficientStockException e) {
+            return ResponseEntity.status(HttpStatus.CONFLICT).body(null);
         }
-
-        // Create new order
-        OrderTable newOrder = new OrderTable();
-        newOrder.setCustomerId(customerId);
-        newOrder.setOrderDate(new Date());
-        newOrder.setTotalAmount(totalAmount);
-        newOrder.setStatus("Pending");
-
-        OrderTable savedOrder = orderTableRepository.save(newOrder);
-
-        Payment newPayment = new Payment();
-        newPayment.setOrderTableId(savedOrder.getOrderId());
-        newPayment.setPaymentDate(new Date());
-        newPayment.setPaymentMethod(paymentRequest.getPaymentMethod());
-        newPayment.setAmount(totalAmount);
-
-        // Save the payment
-        Payment savedPayment = paymentRepository.save(newPayment);
-
-        // Move cart items to order details and clear the cart
-        for (Cart cartItem : cartItems) {
-            OrderDetail orderDetail = new OrderDetail();
-            orderDetail.setOrderId(savedOrder.getOrderId());
-            orderDetail.setProduct(cartItem.getProduct());
-            orderDetail.setQuantity(cartItem.getQuantity());
-
-            orderDetailRepository.save(orderDetail);
-        }
-
-        // Clear the cart after moving items to order details
-        cartRepository.deleteAllByCustomerId(customerId);
     }
 
 
@@ -274,103 +209,59 @@ public class CustomerController {
 
 
 
-//    IMPLEMENTING CUSTOMER SIDE REVIEW ENDPOINTS
 
-    // Endpoint to get all reviews of a customer
-    @GetMapping("api/customers/{customerId}/reviews")
+
+
+
+
+
+
+
+
+
+
+    // Customer side review endpoints
+    @GetMapping("/api/customers/{customerId}/reviews")
     public ResponseEntity<List<Review>> getAllReviewsForCustomer(@PathVariable Integer customerId) {
-        Optional<Customer> customerOptional = customerRepository.findById(customerId);
-
-        if (customerOptional.isPresent()) {
-            List<Review> reviews = reviewRepository.findByCustomer(customerOptional.get());
-            return new ResponseEntity<>(reviews, HttpStatus.OK);
-        } else {
-            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-        }
+        List<Review> reviews = reviewService.getAllReviewsForCustomer(customerId);
+        return ResponseEntity.ok(reviews);
     }
 
-
-    @PostMapping("api/customers/{customerId}/products/{productId}/reviews")
+    @PostMapping("/api/customers/{customerId}/products/{productId}/reviews")
     public ResponseEntity<Review> addReviewForCustomer(@PathVariable Integer customerId, @PathVariable Integer productId, @RequestBody Review review) {
-        Optional<Customer> customerOptional = customerRepository.findById(customerId);
-        Optional<Product> productOptional = productRepository.findById(productId);
-
-        if (productOptional.isPresent()) {
-
-            review.setCustomer(customerOptional.get());
-            review.setProductId(productId);
-
-            Review savedReview = reviewRepository.save(review);
-            return new ResponseEntity<>(savedReview, HttpStatus.CREATED);
-        } else {
-            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-        }
+        Review savedReview = reviewService.addReviewForCustomer(customerId, productId, review);
+        return new ResponseEntity<>(savedReview, HttpStatus.CREATED);
     }
 
-
-    // Endpoint to check if a review exists for a particular product ID by that customer
-    @GetMapping("api/customers/{customerId}/products/{productId}/reviews/check")
+    @GetMapping("/api/customers/{customerId}/products/{productId}/reviews/check")
     public ResponseEntity<Boolean> checkReviewExists(@PathVariable Integer customerId, @PathVariable Integer productId) {
-        Optional<Customer> customerOptional = customerRepository.findById(customerId);
-        Optional<Product> productOptional = productRepository.findById(productId);
-
-        if (customerOptional.isPresent() && productOptional.isPresent()) {
-            boolean exists = reviewRepository.existsByCustomerAndProductId(customerOptional.get(), productId);
-            return new ResponseEntity<>(exists, HttpStatus.OK);
-        } else {
-            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-        }
-    }// Helper method to check if the customer has purchased the product
-
-
-    @GetMapping("api/customers/{customerId}/products/{productId}/check")
-    public boolean hasCustomerPurchasedProduct(@PathVariable Integer customerId, @PathVariable Integer productId) {
-        // to do put it on single query by joining two tables
-        List<OrderTable> customerOrders = orderTableRepository.findAllByCustomerId(customerId);
-        for (OrderTable order : customerOrders) {
-            List<OrderDetail> orderDetails = orderDetailRepository.findByOrderId(order.getOrderId());
-            for (OrderDetail orderDetail : orderDetails) {
-                if (orderDetail.getProduct().getProductId().equals(productId)) {
-                    return true; // Customer has purchased the product
-                }
-            }
-        }
-        return false; // Customer has not purchased the product
+        boolean reviewExists = reviewService.checkReviewExists(customerId, productId);
+        return ResponseEntity.ok(reviewExists);
     }
 
 
 
 
 
+//    @GetMapping("/api/customers/{customerId}/products/{productId}/check")
+//    public ResponseEntity<Boolean> hasCustomerPurchasedProduct(@PathVariable Integer customerId, @PathVariable Integer productId) {
+//        boolean hasPurchased = orderDetailService.hasCustomerPurchasedProduct(customerId, productId);
+//        return ResponseEntity.ok(hasPurchased);
+//    }
 
-    // Endpoint to patch review content and rating
-    @PatchMapping("/{customerId}/reviews/{reviewId}")
-    public ResponseEntity<Review> patchReview(@PathVariable Integer customerId, @PathVariable Integer reviewId, @RequestBody Review reviewUpdates) {
-        Optional<Customer> customerOptional = customerRepository.findById(customerId);
-        Optional<Review> reviewOptional = reviewRepository.findById(reviewId);
+//    @PatchMapping("/{customerId}/reviews/{reviewId}")
+//    public ResponseEntity<Review> patchReview(@PathVariable Integer customerId, @PathVariable Integer reviewId, @RequestBody Review reviewUpdates) {
+//        Review patchedReview = reviewService.patchReview(customerId, reviewId, reviewUpdates);
+//        if (patchedReview != null) {
+//            return ResponseEntity.ok(patchedReview);
+//        } else {
+//            return ResponseEntity.notFound().build();
+//        }
+//    }
 
-        if (customerOptional.isPresent() && reviewOptional.isPresent()) {
-            Review existingReview = reviewOptional.get();
 
-            // Check if the review belongs to the customer
-            if (!existingReview.getCustomer().getCustomerId().equals(customerId)) {
-                return new ResponseEntity<>(HttpStatus.FORBIDDEN);
-            }
 
-            // Update the review content and rating
-            if (reviewUpdates.getRating() != null) {
-                existingReview.setRating(reviewUpdates.getRating());
-            }
-            if (reviewUpdates.getComment() != null) {
-                existingReview.setComment(reviewUpdates.getComment());
-            }
 
-            Review updatedReview = reviewRepository.save(existingReview);
-            return new ResponseEntity<>(updatedReview, HttpStatus.OK);
-        } else {
-            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-        }
-    }
+
 
 }
-

@@ -22,6 +22,10 @@ public class Review {
 //    private Integer customerId;
     private Integer productId;
 
+    @Column(name = "deleted", nullable = false)
+    private boolean deleted = false;
+
+
     public Integer getReviewId() {
         return reviewId;
     }
@@ -84,6 +88,14 @@ public class Review {
 
     public void setCustomer(Customer customer) {
         this.customer = customer;
+    }
+
+    public boolean isDeleted() {
+        return deleted;
+    }
+
+    public void setDeleted(boolean deleted) {
+        this.deleted = deleted;
     }
 
     // Getters and setters

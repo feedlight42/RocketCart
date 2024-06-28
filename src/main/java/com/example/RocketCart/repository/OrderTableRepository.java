@@ -3,6 +3,7 @@ import com.example.RocketCart.model.OrderTable;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.List;
+import java.util.Optional;
 
 public interface OrderTableRepository extends JpaRepository<OrderTable, Integer> {
 //    List<OrderTable> findAllByCustomerId(int customerId);
@@ -14,4 +15,6 @@ public interface OrderTableRepository extends JpaRepository<OrderTable, Integer>
     List<OrderTable> findByPaymentStatus(String notDone);
 
     List<OrderTable> findAllByCustomerId(int customerId);
+
+    Optional<OrderTable> findByCustomerIdAndPaymentStatus(int customerId, String pending);
 }

@@ -23,6 +23,10 @@ public class Cart {
     private Product product;
 
 
+    @Column(name = "deleted", nullable = false)
+    private boolean deleted = false;
+
+
     public Integer getCartItemId() {
         return cartItemId;
     }
@@ -55,6 +59,14 @@ public class Cart {
 
     public void setProduct(Product product) {
         this.product = product;
+    }
+
+    public boolean isDeleted() {
+        return deleted;
+    }
+
+    public void setDeleted(boolean deleted) {
+        this.deleted = deleted;
     }
 
 //    public Integer getProductId() {

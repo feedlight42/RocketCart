@@ -7,6 +7,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 
 import java.util.List;
+import java.util.Optional;
 
 public interface ReviewRepository extends JpaRepository<Review, Integer> {
     List<Review> findByProductId(Integer productId);
@@ -18,4 +19,9 @@ public interface ReviewRepository extends JpaRepository<Review, Integer> {
     @Query("SELECT AVG(r.rating) FROM Review r WHERE r.productId = :productId")
     Double findAverageRatingByProductId(int productId);
 
+    List<Review> findAllByDeletedFalse();
+
+    Optional<Review> findByReviewIdAndDeletedFalse(Integer reviewId);
+
+//    boolean existsByCustomerAndProductId(Customer customer, Integer productId);
 }

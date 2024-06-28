@@ -92,7 +92,7 @@ public class SellerController {
 
 
     @GetMapping("/{sellerId}/products/{productId}/sold")
-    public ResponseEntity<?> getproductssold(@PathVariable int sellerId, @PathVariable int productId, @RequestBody Product productDetails) {
+    public ResponseEntity<?> getproductssold(@PathVariable int sellerId, @PathVariable int productId) {
 
         Product existingProduct = productRepository.findByProductIdAndSellerIdAndDeletedFalse(productId, sellerId);
 
@@ -107,17 +107,20 @@ public class SellerController {
                 .mapToInt(OrderDetail::getQuantity)
                 .sum();
 
+        double totalProductRevenue = totalQuantitySold * existingProduct.getPrice();
+
         // Return the total quantity sold as the response
         return ResponseEntity.ok(totalQuantitySold);
 
     }
 
 
-    @GetMapping("/{sellerId}/demo")
+    @GetMapping("/{sellerId}/count-stat")
     public List<Object[]> demo(@PathVariable Integer sellerId){
-        List<Object[]> h = orderDetailRepository.getProductValuesLast6MonthsSeller(sellerId);
-        return  h;
+        return orderDetailRepository.getMonthlyProductSalesLast6Months(sellerId);
     }
+
+
 
 
     @GetMapping("/{sellerId}/statistics")
