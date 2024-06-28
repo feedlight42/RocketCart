@@ -6,6 +6,7 @@ import com.example.RocketCart.model.Seller;
 import com.example.RocketCart.repository.AdminRepository;
 import com.example.RocketCart.repository.CustomerRepository;
 import com.example.RocketCart.repository.SellerRepository;
+import jakarta.persistence.EntityNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -64,6 +65,17 @@ public class AdminController {
         return sellerRepository.findAllByVerifiedTrue();
     }
 
+    @PostMapping("/sellers/{sellerId}/verify")
+    public void verifySeller(@PathVariable Integer sellerId){
+        Seller seller = sellerRepository.findById(sellerId)
+                .orElseThrow(() -> new EntityNotFoundException("Seller not found with id: " + sellerId));
+
+        // Perform verification logic (e.g., update seller status)
+        seller.setVerified(true); // Example: Setting seller as verified
+
+        // Save the updated seller
+        sellerRepository.save(seller);
+    }
 
     // Get a list of all sellers
     @GetMapping("/sellers/not-verified")

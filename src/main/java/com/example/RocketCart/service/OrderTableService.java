@@ -6,6 +6,7 @@ import com.example.RocketCart.repository.CartRepository;
 import com.example.RocketCart.repository.OrderDetailRepository;
 import com.example.RocketCart.repository.OrderTableRepository;
 import com.example.RocketCart.repository.ProductRepository;
+import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
@@ -131,12 +132,12 @@ public class OrderTableService {
 
 
 
-
+    @Transactional
     public void makePayment(int customerId, Payment paymentRequest) {
         List<Cart> cartItems = cartRepository.findAllByCustomerIdAndDeletedFalse(customerId);
 
         // Retrieve the order that is pending for this customer
-        OrderTable pendingOrder = orderTableRepository.findByCustomerIdAndPaymentStatus(customerId, "Pending").orElse(null);
+        OrderTable pendingOrder = orderTableRepository.findByCustomerIdAndStatus(customerId, "Pending").orElse(null);
         if (pendingOrder == null) {
             throw new IllegalStateException("No pending order found for the customer.");
         }
